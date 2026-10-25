@@ -8,13 +8,16 @@ import type { Tx } from "./counter"
  * stamped on it. Returns whether it wrote, so callers advance their counter
  * only on a real write — a change older than what we hold consumes nothing.
  *
+ * `idCol` is the conflict target: one column, or every column of a composite
+ * primary key.
+ *
  * `insertOnly` names columns to drop from the conflict `set`, for values that
  * belong to whoever created the row and must survive every later push.
  */
 export async function upsertLWW<T extends PgTable>(
   tx: Tx,
   table: T,
-  idCol: PgColumn,
+  idCol: PgColumn | PgColumn[],
   updatedAtCol: PgColumn,
   row: T["$inferInsert"] & { updatedAt: number },
   insertOnly: (keyof T["$inferInsert"])[] = []
@@ -30,6 +33,6 @@ export async function upsertLWW<T extends PgTable>(
       set,
       setWhere: lt(updatedAtCol, row.updatedAt),
     })
-    .returning({ id: idCol })
+    .returning({ id: Array.isArray(idCol) ? idCol[0] : idCol })
   return written.length > 0
 }

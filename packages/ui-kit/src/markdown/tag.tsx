@@ -7,12 +7,16 @@ interface IProps {
   onSelect?: () => void
   icon?: LucideIcon
   title?: string
+  /** Palette id; see `TagChip`. */
+  color?: string
 }
 
 /** A `#tag` in a card body. */
-export function MdTag({ name, onSelect, icon, title }: IProps) {
+export function MdTag({ name, onSelect, icon, title, color }: IProps) {
   if (!onSelect)
-    return <TagChip label={name} icon={icon} className="mx-[0.1em]" />
+    return (
+      <TagChip label={name} icon={icon} color={color} className="mx-[0.1em]" />
+    )
 
   const activate = (e: MouseEvent | KeyboardEvent) => {
     e.preventDefault()
@@ -34,6 +38,7 @@ export function MdTag({ name, onSelect, icon, title }: IProps) {
       <TagChip
         label={name}
         icon={icon}
+        color={color}
         className="transition-colors hover:border-primary/50"
       />
     </span>

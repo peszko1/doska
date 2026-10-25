@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
+import { useMemo } from "react"
 import { countOwnedBoards, listAccounts } from "../api/accounts"
 import { publicBoardToken, publishedBoards } from "../api/boards"
 import { fetchSession } from "../api/auth"
@@ -17,6 +18,8 @@ import {
 } from "../api/identity"
 import * as api from "../api/operations"
 import type { DigestFilter } from "../api/operations"
+import { GLOBAL_ORDER, HABIT_CHECKS, type UserStore } from "../api/constants"
+import { globalLanes } from "../utils/global-board"
 import type { HistoryEntry } from "../types"
 import { keys } from "./keys"
 
@@ -154,6 +157,35 @@ export function useDashboards() {
   })
 }
 
+/** Every live record of one of the account's own stores. Refreshed by the
+ * account channel on a pull, and by whichever mutation writes the store. */
+export function useUserRecords<S extends UserStore>(store: S) {
+  return useQuery({
+    queryKey: keys.userStore(store),
+    queryFn: () => api.getUserRecords(store),
+    networkMode: "always",
+  })
+}
+
+/** Every live habit, archived ones included, in tracker order. */
+export function useHabits() {
+  return useQuery({
+    queryKey: keys.habits,
+    queryFn: () => api.getHabits(),
+    networkMode: "always",
+  })
+}
+
+/** The ticks dated within `[from, to]`. Under the checks store's key, so a
+ * pull or a tick refreshes every range. */
+export function useHabitChecks(from: string, to: string) {
+  return useQuery({
+    queryKey: [...keys.userStore(HABIT_CHECKS), from, to],
+    queryFn: () => api.getHabitChecks(from, to),
+    networkMode: "always",
+  })
+}
+
 /** The sidebar's boards and folders, in order. */
 export function useSidebarTree() {
   return useQuery({
@@ -202,6 +234,33 @@ export function useTrash() {
     queryFn: () => api.getTrash(),
     networkMode: "always",
   })
+}
+
+/**
+ * Every board's cards in the global board's lanes, laid out by the account's
+ * own arrangement. Positions of cards that are gone are simply never looked up.
+ */
+export function useGlobalBoard() {
+  const board = useQuery({
+    queryKey: keys.globalBoard,
+    queryFn: api.getGlobalBoard,
+    networkMode: "always",
+  })
+  const { data: records } = useUserRecords(GLOBAL_ORDER)
+  const data = board.data
+  return useMemo(() => {
+    const order = new Map(
+      (records ?? []).map((record) => [record.id, record.position])
+    )
+    const entries = data?.entries ?? []
+    return {
+      entries,
+      stages: data?.stages ?? new Map(),
+      order,
+      lanes: globalLanes(entries, order),
+      isPending: board.isPending,
+    }
+  }, [data, records, board.isPending])
 }
 
 /** Deadlined cards across every board, for the digest. */

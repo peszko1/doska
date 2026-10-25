@@ -13,6 +13,11 @@ import type {
   PublicBoardSchema,
   SidebarItemSchema,
   SidebarLayoutSchema,
+  TagSchema,
+  GlobalOrderSchema,
+  HabitSchema,
+  HabitCheckSchema,
+  UserRecordChangeSchema,
 } from "./schemas"
 
 export * from "./schemas"
@@ -33,3 +38,8 @@ export type HistoryEntry = z.infer<typeof HistoryEntrySchema>
 export type PublicBoard = z.infer<typeof PublicBoardSchema>
 export type SidebarItem = z.infer<typeof SidebarItemSchema>
 export type SidebarLayout = z.infer<typeof SidebarLayoutSchema>
+export type Tag = z.infer<typeof TagSchema>
+export type GlobalOrder = z.infer<typeof GlobalOrderSchema>
+export type Habit = z.infer<typeof HabitSchema>
+export type HabitCheck = z.infer<typeof HabitCheckSchema>
+export type UserRecordChange = z.infer<typeof UserRecordChangeSchema>

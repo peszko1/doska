@@ -37,6 +37,13 @@ export function refOf(change: Change | DashboardChange): string {
   return `${change.store}/${change.record.id}`
 }
 
+/** The inverse of {@link refOf}. Splits on the first slash only: a tag's id is
+ * its name, which may hold one. */
+export function splitRef(ref: string): [store: string, id: string] {
+  const slash = ref.indexOf("/")
+  return [ref.slice(0, slash), ref.slice(slash + 1)]
+}
+
 /**
  * Hard-deletes tombstones the backend has acked *and* that have aged out of the
  * trash; keeps still-dirty refs. A fresh tombstone is what the trash view reads,
@@ -50,7 +57,7 @@ export async function compact(
   const cutoff = Date.now() - RETENTION_MS
   for (const ref of refs) {
     if (dirty.has(ref)) continue
-    const [store, id] = ref.split("/")
+    const [store, id] = splitRef(ref)
     try {
       const record = await runtime().db.get<{ deletedAt: number | null }>(
         store,

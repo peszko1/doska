@@ -19,6 +19,8 @@ interface IProps {
   menu?: ReactNode
   /** Omit to drop the add-card button. */
   onAddCard?: () => void
+  /** Stands in for the add-card button, where adding needs more than a click. */
+  addCard?: ReactNode
   addCardDisabledReason?: string
   /** Drag state and wiring, supplied by the board's `Droppable`. */
   isDraggingOver?: boolean
@@ -37,6 +39,7 @@ export function ColumnView({
   onRename,
   menu,
   onAddCard,
+  addCard,
   addCardDisabledReason,
   isDraggingOver,
   listRef,
@@ -97,6 +100,7 @@ export function ColumnView({
           isDraggingOver && "bg-primary/5 dark:bg-sidebar/50"
         )}
       >
+        {addCard}
         {onAddCard && (
           <Button
             variant="muted"

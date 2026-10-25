@@ -5,20 +5,27 @@ import {
   MenuSub,
   MenuSubTrigger,
 } from "@doska/ui-kit"
-import { Check, Tag } from "lucide-react"
+import { Check, Settings2, Tag } from "lucide-react"
 import { useState } from "react"
-import { useUpdateCard, useCard, useTagOptions, toggleTag } from "@doska/core"
-import { useDeck } from "@/providers/deck/deck-context"
+import {
+  useUpdateCard,
+  useCard,
+  useTagColor,
+  useTagOptions,
+  toggleTag,
+} from "@doska/core"
+import { ColumnSwatch } from "../../column/column-swatch"
+import { setTagsModalOpen } from "../../tags/tags-modal-store"
 import { NewTagInput } from "./new-tag-input"
 
 const hasTag = (tags: string[], tag: string) =>
   tags.some((t) => t.toLowerCase() === tag.toLowerCase())
 
 export function TagsSub({ cardId }: { cardId: string }) {
-  const { id: deckId } = useDeck()
   const { data: card } = useCard(cardId)
   const { mutate: updateCard } = useUpdateCard(cardId)
-  const options = useTagOptions(deckId)
+  const options = useTagOptions()
+  const tagColor = useTagColor()
   const [query, setQuery] = useState("")
 
   const attached = card?.tags ?? []
@@ -54,11 +61,16 @@ export function TagsSub({ cardId }: { cardId: string }) {
                 updateCard({ tags: toggleTag(attached, option.name) })
               }
             >
-              #{option.name}
+              <ColumnSwatch color={tagColor(option.name)} />#{option.name}
               {hasTag(attached, option.name) && <Check className="ml-auto" />}
             </MenuItem>
           ))}
         </div>
+        <MenuSeparator />
+        <MenuItem onClick={() => setTagsModalOpen(true)}>
+          <Settings2 />
+          Manage tags…
+        </MenuItem>
       </MenuContent>
     </MenuSub>
   )

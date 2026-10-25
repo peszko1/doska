@@ -15,7 +15,11 @@ async function sweep(log: FastifyBaseLogger): Promise<void> {
   try {
     const result = await purgeExpired()
     if (
-      result.cards + result.columns + result.dashboards + result.history ===
+      result.cards +
+        result.columns +
+        result.dashboards +
+        result.history +
+        result.userRecords ===
       0
     )
       return
@@ -35,6 +39,7 @@ async function sweep(log: FastifyBaseLogger): Promise<void> {
         columns: result.columns,
         dashboards: result.dashboards,
         history: result.history,
+        userRecords: result.userRecords,
         attachments: result.attachments.length,
       },
       "purge: removed expired tombstones"

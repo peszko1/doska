@@ -6,7 +6,7 @@ import {
 } from "@doska/sync"
 import { ORPCError } from "@orpc/client"
 import type { StoreName } from "../constants"
-import { DASHBOARDS, HISTORY, SIDEBAR } from "../constants"
+import { DASHBOARDS, HISTORY, SIDEBAR, USER_STORES } from "../constants"
 import { DeckSyncDriver } from "./drivers/board-driver"
 import {
   DashboardListDriver,
@@ -42,7 +42,7 @@ export const classify = (err: unknown): SyncFailure => {
   return "server"
 }
 
-const LIST_STORES: StoreName[] = [DASHBOARDS, SIDEBAR]
+const LIST_STORES: StoreName[] = [DASHBOARDS, SIDEBAR, ...USER_STORES]
 
 const createDrivers = (onRemoved: (boardId: string) => Promise<void>) => ({
   board: new DeckSyncDriver(),

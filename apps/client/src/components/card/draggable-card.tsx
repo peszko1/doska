@@ -1,5 +1,5 @@
 import { Draggable } from "@hello-pangea/dnd"
-import { memo, useRef } from "react"
+import { memo, useRef, type ReactNode } from "react"
 import { useLocation } from "wouter"
 import type { CardPatch, Card as CardData, Column } from "@doska/core"
 import { DROP_ANIMATION_MS } from "@/lib/hooks"
@@ -19,6 +19,9 @@ interface IProps {
   onPatch: (id: string, patch: CardPatch) => void
   /** The card has finished its drop animation and is back in the layout. */
   onDropSettled: (id: string) => void
+  /** Leads the meta row — where a cross-board view names the card's board. */
+  metaLead?: ReactNode
+  className?: string
 }
 
 export const DraggableCard = memo(function DraggableCard({
@@ -30,6 +33,8 @@ export const DraggableCard = memo(function DraggableCard({
   vanishOnDrop,
   onPatch,
   onDropSettled,
+  metaLead,
+  className,
 }: IProps) {
   const [, navigate] = useLocation()
   const id = card.id
@@ -86,6 +91,8 @@ export const DraggableCard = memo(function DraggableCard({
                 card={card}
                 column={column}
                 onPatch={onPatch}
+                metaLead={metaLead}
+                className={className}
               />
               {snapshot.isDragging && (
                 <GhostChip

@@ -1,5 +1,5 @@
 import { CardContent, MdTag, cn } from "@doska/ui-kit"
-import { useBoardMembers } from "@doska/core"
+import { useBoardMembers, useTagColor } from "@doska/core"
 import { AtSign } from "lucide-react"
 import { useDeck } from "@/providers/deck/deck-context"
 import { useAuth } from "@/lib/hooks"
@@ -14,6 +14,7 @@ export function CardTags({ tags, users, className }: IProps) {
   const { id: deckId, toggleTagFilter, toggleUserFilter } = useDeck()
   const { authed } = useAuth()
   const { data: roster } = useBoardMembers(deckId, !!authed)
+  const tagColor = useTagColor()
 
   const members = (roster?.members ?? []).filter((member) =>
     users.includes(member.userId)
@@ -35,6 +36,7 @@ export function CardTags({ tags, users, className }: IProps) {
         <MdTag
           key={tag}
           name={tag}
+          color={tagColor(tag)}
           onSelect={toggleTagFilter && (() => toggleTagFilter(tag))}
         />
       ))}

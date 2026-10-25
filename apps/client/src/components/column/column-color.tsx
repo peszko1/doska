@@ -13,10 +13,30 @@ interface IProps {
   onChange: (color: string) => void
 }
 
-/** Picks a column's color, nested inside the column's actions menu. */
-export function ColumnColorSubmenu({ color, onChange }: IProps) {
+/** The palette as menu items, "No color" first, the current one ticked. */
+export function ColorMenuItems({ color, onChange }: IProps) {
   const isSet = COLUMN_COLORS.some((c) => c.id === color)
 
+  return (
+    <>
+      <MenuItem onClick={() => onChange("")}>
+        <ColumnSwatch color="" />
+        No color
+        {!isSet && <Check className="ml-auto" />}
+      </MenuItem>
+      {COLUMN_COLORS.map((option) => (
+        <MenuItem key={option.id} onClick={() => onChange(option.id)}>
+          <ColumnSwatch color={option.id} />
+          {option.label}
+          {option.id === color && <Check className="ml-auto" />}
+        </MenuItem>
+      ))}
+    </>
+  )
+}
+
+/** Picks a column's color, nested inside the column's actions menu. */
+export function ColumnColorSubmenu({ color, onChange }: IProps) {
   return (
     <MenuSub>
       <MenuSubTrigger>
@@ -24,18 +44,7 @@ export function ColumnColorSubmenu({ color, onChange }: IProps) {
         Color
       </MenuSubTrigger>
       <MenuContent align="start">
-        <MenuItem onClick={() => onChange("")}>
-          <ColumnSwatch color="" />
-          No color
-          {!isSet && <Check className="ml-auto" />}
-        </MenuItem>
-        {COLUMN_COLORS.map((option) => (
-          <MenuItem key={option.id} onClick={() => onChange(option.id)}>
-            <ColumnSwatch color={option.id} />
-            {option.label}
-            {option.id === color && <Check className="ml-auto" />}
-          </MenuItem>
-        ))}
+        <ColorMenuItems color={color} onChange={onChange} />
       </MenuContent>
     </MenuSub>
   )

@@ -58,3 +58,29 @@ export { purgeExpired } from "./purge-expired"
 export { getCardsByNumber } from "./get-cards-by-number"
 export { getDashboard } from "./get-dashboard"
 export { getColumn } from "./get-col"
+export {
+  deleteUserRecord,
+  getUserRecord,
+  getUserRecords,
+  putUserRecord,
+} from "./user-records"
+export {
+  getPinnedTags,
+  getTags,
+  movePinnedTag,
+  renameTag,
+  setTagColor,
+  setTagPinned,
+  tagId,
+} from "./tags"
+export type { TagSummary } from "./tags"
+export { getGlobalBoard } from "./get-global-board"
+export type { GlobalBoard } from "./get-global-board"
+export {
+  createHabit,
+  deleteHabit,
+  getHabitChecks,
+  getHabits,
+  setHabitCheck,
+  updateHabit,
+} from "./habits"

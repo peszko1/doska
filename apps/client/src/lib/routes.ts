@@ -6,8 +6,13 @@ export const routes = {
   /** Deadlined cards from every board. Nested like a deck, so it can host the
    * card panel on the same `routes.card` pattern. */
   digest: () => "/digest",
+  /** Every board's cards in three shared lanes. Nested like the digest, for
+   * the card panel. Takes `?tag=` to open filtered by those tags. */
+  global: () => "/all",
   /** Deleted boards, columns and cards, restorable until they age out. */
   trash: () => "/trash",
+  /** The account's habits, ticked day by day. */
+  habits: () => "/habits",
   /** The desktop quick-note popup, loaded in its own window. */
   quickNote: () => "/quick-note",
   /** One card torn off the panel into its own desktop window. */

@@ -39,7 +39,7 @@ export function CardBodyEditor({
   const { data: card } = useCard(cardId)
   const { addFiles } = useUploads()
   const cardRefs = useCardRefOptions(deckId, cardId)
-  const tags = useTagOptions(deckId)
+  const tags = useTagOptions()
   const members = useMembersOptions(deckId)
   const attachments = card?.attachments
 

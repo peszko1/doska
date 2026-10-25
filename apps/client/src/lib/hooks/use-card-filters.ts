@@ -44,5 +44,5 @@ export function useCardFilters(closeHref: string) {
     setUserFilters([])
   }
 
-  return { filters, clearFilters }
+  return { filters, clearFilters, setTagFilters }
 }

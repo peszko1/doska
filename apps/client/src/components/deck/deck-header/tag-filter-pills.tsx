@@ -1,4 +1,4 @@
-import { useActiveUsers } from "@doska/core"
+import { useActiveUsers, useTagColor } from "@doska/core"
 import { useDeck } from "@/providers/deck/deck-context"
 import { useAuth } from "@/lib/hooks"
 import { FilterPill } from "./filter-pill"
@@ -13,6 +13,7 @@ export function TagFilterPills() {
   } = useDeck()
   const { authed } = useAuth()
   const { data: activeUsers = [] } = useActiveUsers(!!authed)
+  const tagColor = useTagColor()
 
   const users = activeUsers.filter((user) => userFilters.includes(user.id))
   if (tagFilters.length === 0 && users.length === 0) return null
@@ -34,6 +35,7 @@ export function TagFilterPills() {
             key={tag}
             label={tag}
             prefix="#"
+            color={tagColor(tag)}
             onClear={() => toggleTagFilter(tag)}
           />
         ))}

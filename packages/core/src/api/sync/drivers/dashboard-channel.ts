@@ -10,9 +10,13 @@ import {
   COLUMNS,
   DASHBOARDS,
   SIDEBAR,
+  TAGS,
+  USER_STORES,
+  type UserStore,
 } from "../../constants"
 import { db } from "../../db/db"
 import { clock, persistClock } from "../hlc"
+import { splitRef } from "./channel-shared"
 import { resetHistoryCursor } from "./history-driver"
 
 /** Account-level dashboard-list steps, shared server ⇄ filesystem. */
@@ -25,7 +29,7 @@ export async function collectDashboardChanges(
   const dead: string[] = []
 
   for (const ref of dirty.all()) {
-    const [store, id] = ref.split("/")
+    const [store, id] = splitRef(ref)
     let change: DashboardChange | undefined
     switch (store) {
       case DASHBOARDS: {
@@ -38,8 +42,11 @@ export async function collectDashboardChanges(
         if (record) change = { store: SIDEBAR, record }
         break
       }
-      default:
-        continue
+      default: {
+        if (!isUserStore(store)) continue
+        const record = await runtime().db.get(store, id)
+        if (record) change = { store, record } as DashboardChange
+      }
     }
 
     if (!change) {
@@ -54,6 +61,9 @@ export async function collectDashboardChanges(
 
   return { changes, refs }
 }
+
+const isUserStore = (store: string): store is UserStore =>
+  (USER_STORES as readonly string[]).includes(store)
 
 /** Hard-deletes a board's columns and cards, tombstoned or not. */
 export async function purgeBoard(boardId: string): Promise<void> {
@@ -75,6 +85,7 @@ export async function applyDashboardRemote(
   changes: DashboardChange[]
 ): Promise<void> {
   let touched = false
+  const touchedUserStores = new Set<UserStore>()
 
   // A board shared with us brings history older than our cursor.
   for (const { store, record } of changes) {
@@ -92,11 +103,20 @@ export async function applyDashboardRemote(
     )
     if (existing && existing.updatedAt >= record.updatedAt) continue
     await runtime().db.set(store, record.id, record)
+    if (isUserStore(store)) {
+      touchedUserStores.add(store)
+      continue
+    }
     touched = true
     if (store === DASHBOARDS && record.deletedAt != null)
       await purgeBoard(record.id)
   }
   void persistClock()
+
+  for (const store of touchedUserStores)
+    queryClient.invalidateQueries({ queryKey: keys.userStore(store) })
+  if (touchedUserStores.has(TAGS))
+    queryClient.invalidateQueries({ queryKey: keys.tags })
 
   if (touched) {
     queryClient.invalidateQueries({ queryKey: keys.dashboards })
