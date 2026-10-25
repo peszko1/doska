@@ -1,4 +1,11 @@
-import type { Card, Column } from "@doska/contract"
+import type {
+  Card,
+  Column,
+  GlobalOrder,
+  Habit,
+  HabitCheck,
+  Tag,
+} from "@doska/contract"
 
 export type {
   Attachment,
@@ -9,7 +16,19 @@ export type {
   Member,
   SidebarItem,
   SidebarLayout,
+  Tag,
+  GlobalOrder,
+  Habit,
+  HabitCheck,
 } from "@doska/contract"
+
+/** The record each of the account's own stores holds. */
+export type UserRecords = {
+  tags: Tag
+  globalOrder: GlobalOrder
+  habits: Habit
+  habitChecks: HabitCheck
+}
 
 /** A board assembled for the UI: its columns and the cards that live in them. */
 export type Board = {

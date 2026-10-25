@@ -15,6 +15,8 @@ export interface MarkdownRenderers {
   renderWikilink?: (target: string, alias?: string) => ReactNode
   /** Makes `#tag` chips clickable. */
   onTagClick?: (name: string) => void
+  /** A `#tag`'s palette id, for tinting its chip; empty for none. */
+  tagColor?: (name: string) => string
 }
 
 /**

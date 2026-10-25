@@ -1,4 +1,5 @@
 import type { DigestFilter } from "../api/operations"
+import type { UserStore } from "../api/constants"
 
 export const keys = {
   dashboards: ["dashboards"] as const,
@@ -11,12 +12,24 @@ export const keys = {
   cards: ["card"] as const,
   card: (id: string) => ["card", id] as const,
   trash: ["trash"] as const,
+  /** Every board's tags with their styling. Under the board prefix, so a card
+   * write anywhere refreshes it; the account store's key is separate. */
+  tags: ["board", "*", "tags"] as const,
+  /** Under the tags store's key, so a pulled tag refreshes the sidebar. */
+  pinnedTags: ["user", "tags", "pinned"] as const,
+  /** One of the account's own record stores (tags, global order, habits). */
+  userStore: (store: UserStore) => ["user", store] as const,
+  /** Under the habits store's key, apart from its unordered `useUserRecords`. */
+  habits: ["user", "habits", "ordered"] as const,
   /** The prefix of every `history` key, so invalidating it refreshes them all. */
   activity: ["history"] as const,
   history: (entityId: string) => ["history", entityId] as const,
   /** The bare key is the invalidation prefix for every filter's digest. */
   digest: ["digest"] as const,
   digestFilter: (filter: DigestFilter) => ["digest", filter] as const,
+  /** Under the digest prefix: it spans every board the same way, so whatever
+   * refreshes the digest refreshes it too. */
+  globalBoard: ["digest", "global"] as const,
   cardDeck: (id: string) => ["card-deck", id] as const,
   /** The bare key is the invalidation prefix for every card's column. */
   cardCols: ["card-col"] as const,

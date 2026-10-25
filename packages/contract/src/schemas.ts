@@ -178,6 +178,64 @@ export const SidebarLayoutSchema = z.object({
 })
 
 /**
+ * Per-account records. Unlike boards they are never shared: each one belongs to
+ * the account that pushed it, and only that account pulls it back. They ride
+ * the account-level `dashboards.sync` channel alongside the sidebar layout.
+ */
+
+/** A tag's personal styling. Cards reference tags by name, so the id is the
+ * name lowercased and a tag with no record is still a tag, just unstyled. */
+export const TagSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  /** Palette id, as on columns; empty for none. */
+  color: z.string().default(""),
+  /** Fractional-index key among the sidebar's pinned tags; `null` unpinned. */
+  pin: z.string().nullable().default(null),
+  updatedAt: z.number(),
+  deletedAt: z.number().nullable(),
+})
+
+/**
+ * Where a card sits on its owner's global board, keyed by card id. It only
+ * interleaves boards: within one board column the card's own `position` wins.
+ * Cards with no record fall back to a default order.
+ */
+export const GlobalOrderSchema = z.object({
+  id: z.string(),
+  position: z.string(),
+  updatedAt: z.number(),
+  deletedAt: z.number().nullable(),
+})
+
+export const HabitSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  /** Palette id, as on columns; empty for none. */
+  color: z.string().default(""),
+  position: z.string(),
+  /** Hidden from the tracker but kept with its checks; `null` while active. */
+  archivedAt: z.number().nullable().default(null),
+  updatedAt: z.number(),
+  deletedAt: z.number().nullable(),
+})
+
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
+
+/**
+ * One ticked day of a habit, keyed `${habitId}:${date}` so both devices that
+ * tick the same day write the same record. Unticking tombstones it.
+ */
+export const HabitCheckSchema = z.object({
+  id: z.string(),
+  habitId: z.string(),
+  /** The day in the account's own calendar, `YYYY-MM-DD`. */
+  date: z.string().regex(ISO_DATE),
+  updatedAt: z.number(),
+  deletedAt: z.number().nullable(),
+})
+
+/**
  * The whole of a published board, as `GET /api/public/b/:token` returns it.
  *
  * Built out of the record schemas above on purpose: everything the sync tables
@@ -244,11 +302,34 @@ const SidebarChangeSchema = z.object({
   record: SidebarLayoutSchema,
 })
 
-/** A change on the account-level channel (see `dashboards.sync`): a dashboard
- * or the caller's sidebar layout. */
+/** The account channel's per-account record stores, beside the sidebar. */
+export const USER_RECORD_STORES = [
+  "tags",
+  "globalOrder",
+  "habits",
+  "habitChecks",
+] as const
+
+export type UserRecordStore = (typeof USER_RECORD_STORES)[number]
+
+const UserRecordChangeSchemas = [
+  z.object({ store: z.literal("tags"), record: TagSchema }),
+  z.object({ store: z.literal("globalOrder"), record: GlobalOrderSchema }),
+  z.object({ store: z.literal("habits"), record: HabitSchema }),
+  z.object({ store: z.literal("habitChecks"), record: HabitCheckSchema }),
+] as const
+
+export const UserRecordChangeSchema = z.discriminatedUnion(
+  "store",
+  UserRecordChangeSchemas
+)
+
+/** A change on the account-level channel (see `dashboards.sync`): a dashboard,
+ * the caller's sidebar layout, or one of the caller's own records. */
 export const DashboardChangeSchema = z.discriminatedUnion("store", [
   DashboardRecordChangeSchema,
   SidebarChangeSchema,
+  ...UserRecordChangeSchemas,
 ])
 
 /** One board-channel record change, tagged by the store it belongs to. */

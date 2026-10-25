@@ -4,6 +4,7 @@ import { AppSidebar } from "@/components"
 import { CardRevealProvider } from "@/providers/card-reveal/card-reveal-provider"
 import { CardDropProvider } from "@/providers/card-drop/card-drop-provider"
 import { CardPanel } from "@/components/card-panel/card-panel"
+import { TagsModal } from "@/components/tags/tags-modal"
 import {
   DeckProvider,
   type DeckContextValue,
@@ -41,6 +42,7 @@ export function AppShell({ deck, cardCloseHref, children }: IProps) {
             </SidebarInset>
             {cardCloseHref && <CardPanel closeHref={cardCloseHref} />}
           </SidebarProvider>
+          <TagsModal />
         </CardDropProvider>
       </CardRevealProvider>
     </DeckProvider>

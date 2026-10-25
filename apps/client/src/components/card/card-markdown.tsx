@@ -1,5 +1,6 @@
 import { useMemo, type ReactNode } from "react"
 import { MarkdownRenderersProvider } from "@doska/markdown"
+import { useTagColor } from "@doska/core"
 import { CardAttachmentImage } from "./attachments/card-attachment-image"
 import { CardRefLink } from "./refs/card-ref-link"
 import { useDeck } from "@/providers/deck/deck-context"
@@ -17,6 +18,7 @@ export function CardMarkdown({
   children: ReactNode
 }) {
   const { toggleTagFilter } = useDeck()
+  const tagColor = useTagColor()
   const renderers = useMemo(
     () => ({
       renderImage: (key: string, alt: string) => (
@@ -26,8 +28,9 @@ export function CardMarkdown({
         <CardRefLink displayId={target} alias={alias} />
       ),
       onTagClick: toggleTagFilter,
+      tagColor,
     }),
-    [cardId, toggleTagFilter]
+    [cardId, toggleTagFilter, tagColor]
   )
 
   return (

@@ -30,6 +30,7 @@ export function createWebAdapter({
   renderImage,
   renderWikilink,
   onTagClick,
+  tagColor,
 }: MarkdownRenderers): MarkdownAdapter {
   return {
     // ----------------------------------------------------------- blocks
@@ -178,6 +179,7 @@ export function createWebAdapter({
         <MdTag
           key={key}
           name={name}
+          color={tagColor?.(name)}
           onSelect={onTagClick && (() => onTagClick(name))}
         />
       )

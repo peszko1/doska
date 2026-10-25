@@ -3,7 +3,7 @@ import type { Runtime } from "../src/runtime"
 import { installRuntime } from "../src/runtime"
 import { sync } from "../src/api/sync"
 
-/** An in-memory `ClientDB`, keyed `store/key`, honouring the cards-by-column index. */
+/** An in-memory `ClientDB`, keyed `store/key`, honouring inclusive index ranges. */
 export const rows = new Map<string, unknown>()
 
 const inStore = (store: string) =>
@@ -16,11 +16,15 @@ const db = {
     Promise.resolve(rows.get(`${store}/${key}`)),
   getAll: (store: string, query?: { index: string; range?: KeyRange }) =>
     Promise.resolve(
-      inStore(store).filter(
-        (row) =>
-          !query?.range ||
-          (row as Record<string, unknown>)[query.index] === query.range.lower
-      )
+      inStore(store).filter((row) => {
+        if (!query?.range) return true
+        const value = (row as Record<string, string | number>)[query.index]
+        const { lower, upper } = query.range
+        return (
+          (lower === undefined || value >= lower) &&
+          (upper === undefined || value <= upper)
+        )
+      })
     ),
   set: (store: string, key: string, value: unknown) => {
     rows.set(`${store}/${key}`, value)

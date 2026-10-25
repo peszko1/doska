@@ -4,9 +4,11 @@ import {
   COLUMNS,
   DASHBOARDS,
   HISTORY,
+  USER_STORES,
   type StoreName,
 } from "../constants"
 import { db } from "../db/db"
+import { runtime } from "../../runtime"
 import { sync } from "../sync"
 
 /**
@@ -35,6 +37,15 @@ export async function purgeExpired(now = Date.now()): Promise<number> {
   for (const c of cards)
     if (c.deletedAt !== null && c.deletedAt < cutoff)
       expired.push([CARDS, c.id])
+  for (const store of USER_STORES) {
+    const records = await runtime().db.getAll<{
+      id: string
+      deletedAt: number | null
+    }>(store)
+    for (const r of records)
+      if (r.deletedAt !== null && r.deletedAt < cutoff)
+        expired.push([store, r.id])
+  }
 
   let purged = 0
   for (const [store, id] of expired) {

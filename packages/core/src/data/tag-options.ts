@@ -1,30 +1,46 @@
+import { useQuery } from "@tanstack/react-query"
 import { useMemo } from "react"
 import type { PrefixOption } from "@doska/markdown/core"
-import { useBoard } from "./queries"
+import { getPinnedTags, getTags, tagId } from "../api/operations"
+import { keys } from "./keys"
 
-/**
- * Every tag on the board, most used first, for the `#` menu
- */
-export function useTagOptions(deckId: string): PrefixOption[] {
-  const { data: board } = useBoard(deckId)
+/** Every tag across every board, with its count and color. Most used first. */
+export function useTags() {
+  return useQuery({
+    queryKey: keys.tags,
+    queryFn: getTags,
+    networkMode: "always",
+  })
+}
 
+/** The tags pinned to the sidebar, in order. */
+export function usePinnedTags() {
+  return useQuery({
+    queryKey: keys.pinnedTags,
+    queryFn: getPinnedTags,
+    networkMode: "always",
+  })
+}
+
+/** A tag's palette id by name, ignoring case; empty for an unstyled tag. */
+export function useTagColor(): (name: string) => string {
+  const { data: tags } = useTags()
   return useMemo(() => {
-    const counts = new Map<string, { name: string; count: number }>()
+    const colors = new Map(tags?.map((tag) => [tagId(tag.name), tag.color]))
+    return (name: string) => colors.get(tagId(name)) ?? ""
+  }, [tags])
+}
 
-    for (const card of board?.cards ?? []) {
-      for (const name of card.tags ?? []) {
-        const key = name.toLowerCase()
-        const entry = counts.get(key)
-        if (entry) entry.count += 1
-        else counts.set(key, { name, count: 1 })
-      }
-    }
+/** `#` completions for the editor and the tags menu: every board's tags. */
+export function useTagOptions(): PrefixOption[] {
+  const { data: tags } = useTags()
 
-    return [...counts.values()]
-      .sort((a, b) => b.count - a.count)
-      .map(({ name, count }) => ({
+  return useMemo(
+    () =>
+      (tags ?? []).map(({ name, count }) => ({
         name,
         hint: count === 1 ? "1 card" : `${count} cards`,
-      }))
-  }, [board])
+      })),
+    [tags]
+  )
 }

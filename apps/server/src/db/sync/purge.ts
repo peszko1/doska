@@ -2,7 +2,14 @@ import { RETENTION_MS } from "@doska/contract"
 import { and, inArray, isNotNull, lt } from "drizzle-orm"
 import type { PgColumn } from "drizzle-orm/pg-core"
 import { db } from "../client"
-import { boardMembers, cards, columns, dashboards, history } from "../schema"
+import {
+  boardMembers,
+  cards,
+  columns,
+  dashboards,
+  history,
+  userRecords,
+} from "../schema"
 
 /** What one sweep removed, per table. */
 export interface PurgeResult {
@@ -11,6 +18,7 @@ export interface PurgeResult {
   dashboards: number
   members: number
   history: number
+  userRecords: number
   /** Attachment object keys freed with the cards that held them. */
   attachments: string[]
 }
@@ -65,12 +73,18 @@ export async function purgeExpired(now = Date.now()): Promise<PurgeResult> {
     .where(lt(history.createdAt, cutoff))
     .returning({ id: history.id })
 
+  const purgedUserRecords = await db
+    .delete(userRecords)
+    .where(expired(userRecords.deletedAt))
+    .returning({ id: userRecords.id })
+
   return {
     cards: purgedCards.length,
     columns: purgedColumns.length,
     dashboards: purgedDashboards.length,
     members: purgedMembers.length,
     history: purgedHistory.length,
+    userRecords: purgedUserRecords.length,
     attachments: purgedCards.flatMap((c) => c.attachments.map((a) => a.key)),
   }
 }

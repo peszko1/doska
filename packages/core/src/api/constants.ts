@@ -6,7 +6,24 @@ export const SIDEBAR = "sidebar"
 export const SIDEBAR_LAYOUT_ID = "layout"
 export const HISTORY = "history"
 
-export const STORES = [CARDS, COLUMNS, DASHBOARDS, SIDEBAR, HISTORY] as const
+/** The account's own records, synced beside the sidebar on the account channel.
+ * Tags are keyed by lowercased name, global order by card id, checks by
+ * `${habitId}:${date}`. */
+export const TAGS = "tags"
+export const GLOBAL_ORDER = "globalOrder"
+export const HABITS = "habits"
+export const HABIT_CHECKS = "habitChecks"
+export const USER_STORES = [TAGS, GLOBAL_ORDER, HABITS, HABIT_CHECKS] as const
+export type UserStore = (typeof USER_STORES)[number]
+
+export const STORES = [
+  CARDS,
+  COLUMNS,
+  DASHBOARDS,
+  SIDEBAR,
+  HISTORY,
+  ...USER_STORES,
+] as const
 export type StoreName = (typeof STORES)[number]
 
 /** Sync bookkeeping (the pull cursor) — kept in the DB so it shares the data's
@@ -25,6 +42,9 @@ export const CARDS_BY_COLUMN = "columnId"
 export const CARDS_BY_DEADLINE = "deadline"
 
 export const CARDS_BY_NUMBER = "number"
+
+/** Index on `habitChecks.date`, so a tracker's visible range is a seek. */
+export const HABIT_CHECKS_BY_DATE = "date"
 
 export const HISTORY_BY_ENTITY = "entityId"
 export const HISTORY_BY_CREATED = "createdAt"

@@ -9,13 +9,18 @@ import {
   or,
 } from "drizzle-orm"
 import { db } from "../../client"
-import { boardMembers, dashboards, sidebarLayouts } from "../../schema"
+import {
+  boardMembers,
+  dashboards,
+  sidebarLayouts,
+  userRecords,
+} from "../../schema"
 import { boardsListCounter } from "../constants"
 
 /**
  * Returns every dashboard `userId` can reach that changed past `since` — owned
  * or shared with them — plus the ids of boards they have just lost, plus their
- * sidebar layout if it changed, plus the dashboards counter's high-water mark
+ * sidebar layout and own records if they changed, plus the dashboards counter's high-water mark
  * to hand back as the next cursor. Board-independent: a client gets the
  * metadata of every board it can reach, regardless of which one it has open.
  */
@@ -79,6 +84,13 @@ export async function readSince(
         deletedAt: null,
       },
     })
+  }
+
+  for (const r of await db
+    .select({ store: userRecords.store, record: userRecords.record })
+    .from(userRecords)
+    .where(and(eq(userRecords.userId, userId), gt(userRecords.seq, since)))) {
+    changes.push({ store: r.store, record: r.record } as DashboardChange)
   }
 
   const removed = (

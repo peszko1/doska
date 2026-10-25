@@ -1,7 +1,13 @@
 import { ORPCError } from "@orpc/server"
 import { and, count, eq, isNull, ne } from "drizzle-orm"
 import { db } from "./client"
-import { account, dashboards, sidebarLayouts, user } from "./schema"
+import {
+  account,
+  dashboards,
+  sidebarLayouts,
+  user,
+  userRecords,
+} from "./schema"
 
 export interface AccountRow {
   id: string
@@ -53,6 +59,7 @@ export async function listSsoUserIds(): Promise<string[]> {
 export async function deleteAccount(userId: string): Promise<void> {
   await db.transaction(async (tx) => {
     await tx.delete(sidebarLayouts).where(eq(sidebarLayouts.userId, userId))
+    await tx.delete(userRecords).where(eq(userRecords.userId, userId))
     await tx.delete(user).where(eq(user.id, userId))
   })
 }

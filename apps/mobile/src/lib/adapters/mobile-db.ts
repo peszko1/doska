@@ -4,11 +4,16 @@ import {
   CARDS_BY_DEADLINE,
   COLUMNS,
   DASHBOARDS,
+  GLOBAL_ORDER,
+  HABIT_CHECKS,
+  HABIT_CHECKS_BY_DATE,
+  HABITS,
   HISTORY,
   HISTORY_BY_CREATED,
   HISTORY_BY_ENTITY,
   META_STORE,
   SIDEBAR,
+  TAGS,
 } from "@doska/core"
 import { SQLiteDB } from "./sqlite-db"
 
@@ -24,4 +29,8 @@ export const mobileDb = new SQLiteDB(DB_NAME, VERSION, {
   [META_STORE]: [],
   [SIDEBAR]: [],
   [HISTORY]: [HISTORY_BY_ENTITY, HISTORY_BY_CREATED],
+  [TAGS]: [],
+  [GLOBAL_ORDER]: [],
+  [HABITS]: [],
+  [HABIT_CHECKS]: [HABIT_CHECKS_BY_DATE],
 })

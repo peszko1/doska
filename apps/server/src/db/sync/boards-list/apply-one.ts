@@ -1,7 +1,7 @@
 import type { DashboardChange } from "@doska/contract"
 import { eq } from "drizzle-orm"
 import { type Tx } from "../core/counter"
-import { dashboards, sidebarLayouts } from "../../schema"
+import { dashboards, sidebarLayouts, userRecords } from "../../schema"
 import { upsertLWW } from "../core/upsert-lww"
 
 /**
@@ -25,6 +25,26 @@ export async function applyOne(
         userId,
         items: change.record.items,
         updatedAt: change.record.updatedAt,
+        seq: nextSeq,
+      }
+    )
+  }
+
+  if (change.store !== "dashboards") {
+    // One of the caller's own records. Keyed under the caller, so a push can
+    // only ever land on their own rows.
+    return upsertLWW(
+      tx,
+      userRecords,
+      [userRecords.userId, userRecords.store, userRecords.id],
+      userRecords.updatedAt,
+      {
+        userId,
+        store: change.store,
+        id: change.record.id,
+        record: change.record,
+        updatedAt: change.record.updatedAt,
+        deletedAt: change.record.deletedAt,
         seq: nextSeq,
       }
     )

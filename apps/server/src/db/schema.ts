@@ -5,6 +5,8 @@ import type {
   HistoryEntry,
   MemberRole,
   SidebarItem,
+  UserRecordChange,
+  UserRecordStore,
 } from "@doska/contract"
 import {
   bigint,
@@ -158,6 +160,26 @@ export const sidebarLayouts = pgTable("sidebar_layouts", {
   updatedAt: bigint("updated_at", { mode: "number" }).notNull(),
   seq: integer("seq").notNull(),
 })
+
+// One account's own records (tags, global board order, habits), all stores in
+// one table: the server never reads inside them, it only keeps the newest per
+// key. `seq` is from the board-list counter; tombstones age out like cards.
+export const userRecords = pgTable(
+  "user_records",
+  {
+    userId: text("user_id").notNull(),
+    store: text("store").$type<UserRecordStore>().notNull(),
+    id: text("id").notNull(),
+    record: jsonb("record").$type<UserRecordChange["record"]>().notNull(),
+    updatedAt: bigint("updated_at", { mode: "number" }).notNull(),
+    deletedAt: bigint("deleted_at", { mode: "number" }),
+    seq: integer("seq").notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.userId, t.store, t.id] }),
+    index("user_records_user_seq").on(t.userId, t.seq),
+  ]
+)
 
 export const history = pgTable(
   "history",
