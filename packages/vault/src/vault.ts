@@ -347,6 +347,7 @@ export class Vault {
       priority: file.card.priority,
       tags: file.card.tags,
       users: file.card.users,
+      parent: file.card.parent,
       extra: file.card.extra,
     })
 
@@ -357,6 +358,7 @@ export class Vault {
       priority: card.priority,
       tags: card.tags,
       users: card.users,
+      ...(card.parent ? { parentId: card.parent } : {}),
     })
     await folder.save(card, file.path)
     this.written.set(id, { path: file.path, text: card.text })

@@ -174,6 +174,28 @@ export function createBoard(store: BoardStore) {
       return found
     },
 
+    /**
+     * Checks a card can go under `parentId` — one level only, as in the app: the
+     * epic has no epic of its own, and the card has no sub-cards on any board.
+     */
+    async epic(
+      cardId: string,
+      parentId: string,
+      parentBoardId: string
+    ): Promise<void> {
+      if (parentId === cardId) throw new Error("A card can't be its own epic")
+      const parent = await this.card(parentBoardId, parentId)
+      if (parent.parentId)
+        throw new Error(`Card ${parentId} is already in an epic`)
+      for (const dashboard of await this.dashboards()) {
+        const { cards } = await this.board(dashboard.id)
+        if (cards.some((c) => c.parentId === cardId))
+          throw new Error(
+            `Card ${cardId} has sub-cards, so it can't join an epic`
+          )
+      }
+    },
+
     members(boardId: string): Promise<Member[]> {
       return store.readMembers(boardId)
     },

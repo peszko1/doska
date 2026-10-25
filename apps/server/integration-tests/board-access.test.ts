@@ -30,6 +30,7 @@ const column = (id: string, title: string, dashboardId = "b1") => ({
     collapsed: false,
     color: "",
     done: false,
+    backlog: false,
     updatedAt: now,
     deletedAt: null,
   },

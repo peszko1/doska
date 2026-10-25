@@ -155,6 +155,7 @@ export async function readPublicBoard(
       title: dashboards.title,
       position: dashboards.position,
       sort: dashboards.sort,
+      defaultTags: dashboards.defaultTags,
       updatedAt: dashboards.updatedAt,
       deletedAt: dashboards.deletedAt,
     })
@@ -171,6 +172,7 @@ export async function readPublicBoard(
         collapsed: columns.collapsed,
         color: columns.color,
         done: columns.done,
+        backlog: columns.backlog,
         updatedAt: columns.updatedAt,
         deletedAt: columns.deletedAt,
       })
@@ -188,6 +190,7 @@ export async function readPublicBoard(
         priority: cards.priority,
         tags: cards.tags,
         attachments: cards.attachments,
+        parentId: cards.parentId,
         updatedAt: cards.updatedAt,
         deletedAt: cards.deletedAt,
       })

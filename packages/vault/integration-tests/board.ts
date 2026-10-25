@@ -84,6 +84,7 @@ export async function installBoard(columns: Column[]): Promise<TestBoard> {
     title: "Board",
     position: "a0",
     sort: [],
+    defaultTags: [],
     updatedAt: 1,
     deletedAt: null,
   }
@@ -131,6 +132,7 @@ export function makeColumn(
     collapsed: false,
     color: "",
     done: false,
+    backlog: false,
     updatedAt: 1,
     deletedAt: null,
     stamps: {},

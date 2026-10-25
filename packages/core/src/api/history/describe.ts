@@ -17,6 +17,7 @@ type Data = {
   fromBoard?: string
   toBoard?: string
   toCard?: string
+  epic?: string
 }
 
 type ListField = "tags" | "users" | "attachments"
@@ -107,6 +108,19 @@ function deadlineLabel(date: string): string {
   return formatDeadlineShort(date)
 }
 
+/** "added Fix login to epic [Auth]" / "removed Fix login from epic [Auth]" */
+function describeParent(data: Data, name: EntryPart[]): EntryPart[] | null {
+  const to = asText(data.to)
+  const id = to || asText(data.from)
+  // Joined then left again within one merged row.
+  if (!id || to === asText(data.from)) return null
+  const epic: EntryPart[] = data.epic
+    ? [{ kind: "title", text: data.epic, cardId: id }]
+    : []
+  if (to) return [text("added"), ...name, text("to epic"), ...epic]
+  return [text("removed"), ...name, text("from epic"), ...epic]
+}
+
 function describeEdit(data: Data, name: EntryPart[]): EntryPart[] | null {
   switch (data.field) {
     case "priority":
@@ -117,6 +131,8 @@ function describeEdit(data: Data, name: EntryPart[]): EntryPart[] | null {
     case "users":
     case "attachments":
       return describeList(data.field, name, asList(data.from), asList(data.to))
+    case "parentId":
+      return describeParent(data, name)
     default:
       return null
   }

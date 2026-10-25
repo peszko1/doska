@@ -26,6 +26,7 @@ function card(id: string, updatedAt: number, title = id) {
     number: null,
     deadline: null,
     attachments: [],
+    parentId: null,
     updatedAt,
     deletedAt: null,
   }

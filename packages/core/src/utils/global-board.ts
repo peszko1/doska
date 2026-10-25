@@ -7,7 +7,8 @@ import { byPosition, keyBetween } from "./position"
  * The global board: every board's cards in three shared lanes. A board's
  * columns map onto them by the `done` flag and their order — the leftmost
  * column not marked done is To do, the other undone ones In progress, and done
- * columns Done — so no column needs configuring to take part.
+ * columns Done — so no column needs configuring to take part. A board's backlog
+ * column feeds no lane: its cards wait off the global board.
  */
 export const GLOBAL_STAGES = ["todo", "doing", "done"] as const
 export type GlobalStage = (typeof GLOBAL_STAGES)[number]
@@ -38,6 +39,7 @@ export function boardStages(columns: Column[]): Map<string, BoardStages> {
       stages = { todo: [], doing: [], done: [] }
       byBoard.set(column.dashboardId, stages)
     }
+    if (column.backlog) continue
     if (column.done) stages.done.push(column)
     else if (stages.todo.length === 0) stages.todo.push(column)
     else stages.doing.push(column)

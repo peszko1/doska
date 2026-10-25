@@ -11,6 +11,7 @@ import {
   useRenameDashboard,
   useSetColumnCollapsed,
   useSetColumnColor,
+  useSetColumnBacklog,
   useSetColumnDone,
   useSetDashboardSort,
   type CardPatch,
@@ -41,6 +42,7 @@ export function DeckView({ dashboard }: { dashboard: Dashboard }) {
   const { mutate: setColumnCollapsed } = useSetColumnCollapsed(id)
   const { mutate: setColumnColor } = useSetColumnColor(id)
   const { mutate: setColumnDone } = useSetColumnDone(id)
+  const { mutate: setColumnBacklog } = useSetColumnBacklog(id)
 
   const { mutate: renameDashboard } = useRenameDashboard()
   const { mutate: deleteDashboard } = useDeleteDashboard()
@@ -94,6 +96,9 @@ export function DeckView({ dashboard }: { dashboard: Dashboard }) {
       }
       onChangeColumnDone={(columnId, done) =>
         setColumnDone({ id: columnId, done })
+      }
+      onChangeColumnBacklog={(columnId, backlog) =>
+        setColumnBacklog({ id: columnId, backlog })
       }
       onRenameColumn={(columnId, title) =>
         renameColumn({ id: columnId, title })

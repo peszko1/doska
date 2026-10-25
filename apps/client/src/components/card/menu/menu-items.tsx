@@ -1,8 +1,11 @@
 import { MenuContent, MenuItem, MenuSeparator } from "@doska/ui-kit"
 import { History, Pencil } from "lucide-react"
+import { BacklogItem } from "./backlog-item"
+import { CardMenuExtraItems } from "./card-menu-extras"
 import { CopyIdItem } from "./copy-id-item"
 import { DeadlineSub } from "./deadline-sub"
 import { DeleteItem } from "./delete-item"
+import { EpicItems } from "./epic-items"
 import { MoveToBoardSub } from "./move-to-board-sub"
 import { MoveToColumnSub } from "./move-to-column-sub"
 import { PrioritySub } from "./priority-sub"
@@ -32,8 +35,11 @@ export function CardMenuItems({
         Edit
       </MenuItem>
       <MenuSeparator />
+      <CardMenuExtraItems cardId={cardId} />
       <MoveToColumnSub cardId={cardId} />
       <MoveToBoardSub cardId={cardId} />
+      <BacklogItem cardId={cardId} />
+      <EpicItems cardId={cardId} />
       <MenuSeparator />
       <PrioritySub cardId={cardId} />
       <TagsSub cardId={cardId} />

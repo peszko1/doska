@@ -10,7 +10,13 @@ type Field = Exclude<keyof CardPatch, "bodyConflict">
 
 type FieldChange =
   | { field: "body" }
-  | { field: Field; from: string | string[]; to: string | string[] }
+  | {
+      field: Field
+      from: string | string[]
+      to: string | string[]
+      /** For `parentId`: the epic's title, the one joined or else the one left. */
+      epic?: string
+    }
 
 function changedFields(before: Card, patch: CardPatch): Field[] {
   return (Object.keys(patch) as (keyof CardPatch)[]).filter(
@@ -24,12 +30,21 @@ function valueOf(card: Card, field: Exclude<Field, "body">) {
   if (field === "attachments")
     return card.attachments.map((attachment) => attachment.name)
   if (field === "deadline") return card.deadline ?? ""
+  if (field === "parentId") return card.parentId ?? ""
   return card[field]
 }
 
 function changeOf(field: Field, before: Card, after: Card): FieldChange {
   if (field === "body") return { field }
   return { field, from: valueOf(before, field), to: valueOf(after, field) }
+}
+
+/** Names the epic in a `parentId` row; ids alone don't read as a sentence. */
+async function withEpic(change: FieldChange): Promise<FieldChange> {
+  if (change.field !== "parentId") return change
+  const id = change.to || change.from
+  const epic = typeof id === "string" && id ? await db.getCard(id) : undefined
+  return { ...change, epic: epic?.title ?? "" }
 }
 
 function canMerge(entry: HistoryEntry, userId: string | null): boolean {
@@ -81,7 +96,7 @@ export async function recordEdit(
     // Naming a new card isn't a rename; its create row just got the title.
     if (field === "title" && before.title === "") continue
 
-    const change = changeOf(field, before, card)
+    const change = await withEpic(changeOf(field, before, card))
     const last = history.find((entry) => entry.data.field === field)
 
     if (last && canMerge(last, userId)) {

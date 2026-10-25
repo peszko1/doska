@@ -101,6 +101,13 @@ describe("boardStages", () => {
     expect(stageColumn(b, "doing")?.id).toBe("only")
     expect(stageColumn(b, "done")).toBeNull()
   })
+
+  it("leaves the backlog column out, so To do is the next one", () => {
+    const backlog = { ...column("later", "b", "a0"), backlog: true }
+    const b = boardStages([backlog, column("todo", "b", "a1")]).get("b")!
+    expect(b.todo.map((c) => c.id)).toEqual(["todo"])
+    expect([...b.doing, ...b.done]).toEqual([])
+  })
 })
 
 describe("laneOrder", () => {
@@ -169,6 +176,13 @@ describe("planGlobalDrop", () => {
     // Someone else, with no arrangement of their own, still follows the board.
     const theirs = laneOrder(w.entries, new Map()).map((e) => e.card.id)
     expect(theirs.filter((id) => id.startsWith("W"))).toEqual(["W2", "W1"])
+  })
+
+  it("moves a card to the top of its own lane, board order following", () => {
+    const w = twoBoards()
+    expect(drop(w, "W2", "todo", 0)).toBe(true)
+    expect(lane(w, "todo")[0]).toBe("W2")
+    expect(boardOrder(w, "web")).toEqual(["W2", "W1"])
   })
 
   it("interleaves boards without touching board order", () => {

@@ -29,6 +29,7 @@ export async function createColumn(
     collapsed: false,
     color: "",
     done: false,
+    backlog: false,
     updatedAt: 0,
     deletedAt: null,
     stamps: {},

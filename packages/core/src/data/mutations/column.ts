@@ -61,7 +61,32 @@ export function useSetColumnDone(deckId: string) {
     ({ id, done }: { id: string; done: boolean }) =>
       api.setColumnDone(id, done),
     {
-      apply: (board, { id, done }) => patchColumn(board, id, { done }),
+      apply: (board, { id, done }) =>
+        patchColumn(board, id, done ? { done, backlog: false } : { done }),
+      also: () => [keys.digest],
+    }
+  )
+}
+
+/** Marks the board's backlog column: the one cards wait in off the global
+ * board. Mirrors the setter in the cache — siblings lose the flag, and a
+ * column that becomes the backlog stops being done. */
+export function useSetColumnBacklog(deckId: string) {
+  return useBoardPatch(
+    deckId,
+    ({ id, backlog }: { id: string; backlog: boolean }) =>
+      api.setColumnBacklog(id, backlog),
+    {
+      apply: (board, { id, backlog }) => ({
+        ...board,
+        columns: board.columns.map((c) =>
+          c.id === id
+            ? { ...c, backlog, done: backlog ? false : c.done }
+            : backlog && c.backlog
+              ? { ...c, backlog: false }
+              : c
+        ),
+      }),
       also: () => [keys.digest],
     }
   )

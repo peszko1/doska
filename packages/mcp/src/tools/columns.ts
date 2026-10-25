@@ -53,6 +53,7 @@ export function registerColumnTools(server: McpServer, board: Board): void {
           dashboardId: boardId,
           collapsed: false,
           done,
+          backlog: false,
           color: color ?? "",
           updatedAt: now,
           deletedAt: null,

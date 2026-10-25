@@ -27,6 +27,7 @@ function card(id: string) {
     number: null,
     deadline: null,
     attachments: [],
+    parentId: null,
     updatedAt: now,
     deletedAt: null,
   }
@@ -118,6 +119,7 @@ describe("purgeExpired", () => {
         collapsed: false,
         color: "",
         done: false,
+        backlog: false,
         updatedAt: now,
         deletedAt: stale,
         seq: 1,

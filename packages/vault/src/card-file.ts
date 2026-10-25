@@ -22,13 +22,17 @@ const KNOWN = [
   "tags",
   "users",
   "attachments",
+  "parent",
   "stamps",
   "bodyConflict",
   "syncedBody",
 ]
 
 export type CardPatch = Partial<
-  Pick<Card, "title" | "body" | "deadline" | "priority" | "tags" | "users">
+  Pick<
+    Card,
+    "title" | "body" | "deadline" | "priority" | "tags" | "users" | "parentId"
+  >
 >
 
 /**
@@ -46,6 +50,9 @@ export class CardFile {
   readonly tags: string[]
   readonly users: string[]
   readonly attachments: Attachment[]
+  /** The epic's card id; `""` unlinks, `null` when the file doesn't say, so
+   * a file written before epics leaves the link alone. */
+  readonly parent: string | null
   readonly extra: Record<string, unknown>
 
   constructor(fields: {
@@ -58,6 +65,7 @@ export class CardFile {
     tags?: string[]
     users?: string[]
     attachments?: Attachment[]
+    parent?: string | null
     extra?: Record<string, unknown>
   }) {
     this.id = fields.id ?? ""
@@ -69,6 +77,7 @@ export class CardFile {
     this.tags = fields.tags ?? []
     this.users = fields.users ?? []
     this.attachments = fields.attachments ?? []
+    this.parent = fields.parent ?? null
     this.extra = fields.extra ?? {}
   }
 
@@ -83,6 +92,7 @@ export class CardFile {
       tags: card.tags ?? [],
       users: card.users ?? [],
       attachments: card.attachments,
+      parent: card.parentId,
       extra,
     })
   }
@@ -105,6 +115,7 @@ export class CardFile {
       priority: str(front.priority),
       tags: tagList(front.tags),
       users: nameList(front.users),
+      parent: "parent" in front ? str(front.parent) : null,
       extra,
     })
   }
@@ -120,6 +131,7 @@ export class CardFile {
     if (this.users.length > 0) front.users = this.users
     const unshown = unshownIn(body, this.attachments)
     if (unshown.length > 0) front.attachments = unshown
+    if (this.parent) front.parent = this.parent
     Object.assign(front, this.extra)
 
     return render(front, body)
@@ -136,6 +148,9 @@ export class CardFile {
     if (this.priority !== card.priority) patch.priority = this.priority
     if (!sameList(this.tags, card.tags ?? [])) patch.tags = this.tags
     if (!sameList(this.users, card.users ?? [])) patch.users = this.users
+    if (this.parent !== null && this.parent !== (card.parentId ?? "")) {
+      patch.parentId = this.parent || null
+    }
     return Object.keys(patch).length > 0 ? patch : null
   }
 }

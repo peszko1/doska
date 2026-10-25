@@ -8,9 +8,11 @@ import {
   MenuTrigger,
 } from "@doska/ui-kit"
 import { ArrowRightLeft, History, MoreHorizontal, Trash2 } from "lucide-react"
+import { useAddTagToBoardCards, useBoard } from "@doska/core"
 import { ConfirmDialog } from "../../confirm-dialog"
 import { HistoryModal } from "../../history/history-modal"
 import { ReorderColumnsModal } from "../reorder-columns/reorder-columns-modal"
+import { DefaultTagsSub } from "./default-tags-sub"
 import { SortSub } from "./sort-sub"
 import type { Column } from "@doska/core"
 
@@ -36,10 +38,25 @@ export function BoardActionsMenu({
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [reorderOpen, setReorderOpen] = useState(false)
   const [historyOpen, setHistoryOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  // A tag just made a default, offered to the cards already on the board.
+  const [backfill, setBackfill] = useState<{ tag: string; count: number }>()
+  const { data: board } = useBoard(boardId)
+  const { mutate: addTagToCards } = useAddTagToBoardCards(boardId)
+
+  function offerBackfill(tag: string) {
+    const key = tag.toLowerCase()
+    const count = (board?.cards ?? []).filter(
+      (card) => !(card.tags ?? []).some((t) => t.toLowerCase() === key)
+    ).length
+    if (count === 0) return
+    setMenuOpen(false)
+    setBackfill({ tag, count })
+  }
 
   return (
     <>
-      <Menu>
+      <Menu open={menuOpen} onOpenChange={setMenuOpen}>
         <MenuTrigger
           render={
             <Button
@@ -55,6 +72,7 @@ export function BoardActionsMenu({
         </MenuTrigger>
         <MenuContent>
           <SortSub sort={sort} onChangeSort={onChangeSort} />
+          <DefaultTagsSub boardId={boardId} onAdded={offerBackfill} />
           <MenuItem
             onClick={() => setReorderOpen(true)}
             disabled={columns.length < 2}
@@ -80,6 +98,15 @@ export function BoardActionsMenu({
         description={`"${title}" and all of its columns and cards move to the trash, where they stay restorable for 14 days.`}
         confirmLabel="Delete board"
         onConfirm={onDelete}
+      />
+      <ConfirmDialog
+        open={backfill !== undefined}
+        onOpenChange={(open) => !open && setBackfill(undefined)}
+        title={`Add #${backfill?.tag} to existing cards?`}
+        description={`${backfill?.count} ${backfill?.count === 1 ? "card" : "cards"} already on this board don't have it yet.`}
+        confirmLabel="Add tag"
+        destructive={false}
+        onConfirm={() => backfill && addTagToCards(backfill.tag)}
       />
       <ReorderColumnsModal
         open={reorderOpen}

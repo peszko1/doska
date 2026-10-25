@@ -37,6 +37,7 @@ export type CardPatch = Partial<
     | "tags"
     | "users"
     | "attachments"
+    | "parentId"
     | "bodyConflict"
   >
 >
@@ -91,6 +92,31 @@ export function useMoveCardToColumn() {
       qc.invalidateQueries({ queryKey: keys.trash })
     },
   })
+}
+
+/** Writes that re-file a card on its own board from anywhere — the card menu,
+ * the backlog page, the global board — so every board's cache refreshes. */
+function useCardRefile(refile: (id: string) => Promise<string>) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => refile(id),
+    onSettled: (_data, _err, id) => {
+      for (const key of cardWriteKeys(id))
+        qc.invalidateQueries({ queryKey: key })
+      qc.invalidateQueries({ queryKey: keys.cardCol(id) })
+    },
+  })
+}
+
+/** Parks a card at the top of its board's backlog, making the column if the
+ * board has none — see {@link api.moveCardToBacklog}. */
+export function useMoveCardToBacklog() {
+  return useCardRefile(api.moveCardToBacklog)
+}
+
+/** Takes a card out of the backlog to the top of its board's To do column. */
+export function useSendCardToBoard() {
+  return useCardRefile(api.sendCardToBoard)
 }
 
 /**

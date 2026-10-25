@@ -40,6 +40,7 @@ See [Accounts](/accounts).
 | `get_card`                       | One card, without pulling the whole board                                              |
 | `create_board`                   | New board with the default To Do / In Progress / Done columns                          |
 | `rename_board`, `delete_board`   | Rename; delete along with its columns and cards                                        |
+| `set_board_default_tags`         | The tags every card created on or moved onto the board gets                            |
 | `create_column`, `delete_column` | Delete takes the column's cards with it                                                |
 | `update_column`                  | Title, color, collapsed, or which column counts as done                                |
 | `move_column`                    | Reorder: to either end, or next to another column                                      |

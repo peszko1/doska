@@ -220,4 +220,31 @@ describe("CardFile", () => {
     expect(parsed.extra).toEqual({ aliases: ["ops"] })
     expect(CardFile.fromCard(card, parsed.extra).text).toContain("aliases:")
   })
+
+  it("writes and reads back the card's epic", () => {
+    const card = makeCard({ columnId: "col-1", title: "Ship it" })
+    const linked = { ...card, parentId: "card-epic" }
+    const text = CardFile.fromCard(linked).text
+
+    expect(text).toContain("parent: card-epic")
+    expect(CardFile.fromCard(card).text).not.toContain("parent")
+    const parsed = CardFile.parse(text)
+    expect(parsed.parent).toBe("card-epic")
+    expect(parsed.patchFor(linked)).toBeNull()
+    expect(parsed.patchFor(card)).toEqual({ parentId: "card-epic" })
+  })
+
+  it("leaves the epic alone when the file doesn't name one", () => {
+    const card = makeCard({ columnId: "col-1", title: "Ship it" })
+    const linked = { ...card, parentId: "card-epic" }
+    const old = CardFile.parse(`---\nid: ${card.id}\ntitle: Ship it\n---\n`)
+    expect(old.parent).toBeNull()
+    expect(old.patchFor(linked)).toBeNull()
+
+    const cleared = CardFile.parse(
+      `---\nid: ${card.id}\ntitle: Ship it\nparent:\n---\n`
+    )
+    expect(cleared.patchFor(linked)).toEqual({ parentId: null })
+    expect(cleared.extra).toEqual({})
+  })
 })

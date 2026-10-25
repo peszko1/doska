@@ -1,8 +1,8 @@
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useRoute } from "wouter"
 import { sync, useCardDeckId } from "@doska/core"
 import { GlobalBoardView } from "@/components/global-board/global-board-view"
-import { useCardFilters, useTagQuery } from "@/lib/hooks"
+import { useCardFilters, useFilterQuery, useTagQuery } from "@/lib/hooks"
 import { routes } from "@/lib/routes"
 import { AppShell } from "./app-shell"
 
@@ -17,10 +17,18 @@ export function GlobalBoardPage() {
   const closeHref = `~${routes.global()}`
   const { filters, setTagFilters } = useCardFilters(closeHref)
   useTagQuery(filters.tagFilters, setTagFilters)
+  const [epics, setEpics] = useState<string[]>([])
+  useFilterQuery("epic", epics, setEpics)
 
   const deck = useMemo(
-    () => ({ id: cardDeckId ?? "", sort: [], ...filters }),
-    [cardDeckId, filters]
+    () => ({
+      id: cardDeckId ?? "",
+      sort: [],
+      ...filters,
+      epicFilter: epics[0] ?? null,
+      clearEpicFilter: () => setEpics([]),
+    }),
+    [cardDeckId, filters, epics]
   )
 
   return (

@@ -1,4 +1,5 @@
 import { CARD_GROUPS } from "@doska/contract"
+import { applyDefaultTags } from "@doska/utils"
 import { generateKeyBetween } from "fractional-indexing"
 import { byPosition } from "../../utils"
 import { db } from "../db/db"
@@ -16,7 +17,8 @@ import { newId } from "./new-id"
  *
  * Across boards that is a fresh id: the server files a card under the board it
  * was first pushed to and never re-files it, so the card is copied onto the new
- * board and the original tombstoned.
+ * board and the original tombstoned. The copy picks up the new board's default
+ * tags.
  */
 export async function moveCardToColumn(
   id: string,
@@ -44,9 +46,11 @@ export async function moveCardToColumn(
   }
 
   const copyId = newId("card")
+  const board = await db.getDashboard(to.dashboardId)
+  const tags = applyDefaultTags(card.tags ?? [], board?.defaultTags ?? [])
   await db.setCard(
     touchCard(
-      { ...card, id: copyId, columnId, position, number: null },
+      { ...card, id: copyId, columnId, position, number: null, tags },
       CARD_GROUPS
     )
   )

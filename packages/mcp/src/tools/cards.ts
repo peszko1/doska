@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { CARD_GROUPS, type Card, type CardGroup } from "@doska/contract"
 import { taskProgress, toggleTaskByIndex } from "@doska/markdown/core"
 import { PRIORITIES } from "@doska/tokens"
+import { applyDefaultTags } from "@doska/utils"
 import { z } from "zod"
 import {
   type Board,
@@ -50,6 +51,19 @@ const cardId = z
       "A card's [[12]] reference number is not one."
   )
 
+const parentId = z
+  .string()
+  .nullable()
+  .describe(
+    "The epic this card is a sub-card of, by its own id; null takes it out. " +
+      "One level only: an epic can't itself be in one"
+  )
+
+const parentBoardId = z
+  .string()
+  .optional()
+  .describe("The epic's board, when it isn't this card's own")
+
 const place = z
   .enum(["top", "bottom"])
   .describe("Which end of the column the card lands on")
@@ -62,7 +76,8 @@ export function registerCardTools(server: McpServer, board: Board): void {
       description:
         "Add a card to a column. The body is Markdown in the board's " +
         "dialect — task lists, [[12]] card links, " +
-        "==highlight==, and a -cut- line ending the board preview.",
+        "==highlight==, and a -cut- line ending the board preview. " +
+        "The card also gets the board's default tags.",
       inputSchema: {
         boardId: z.string(),
         columnId: z.string(),
@@ -72,6 +87,8 @@ export function registerCardTools(server: McpServer, board: Board): void {
         priority: priority.optional(),
         tags: tags.optional(),
         users: users.optional(),
+        parentId: parentId.optional(),
+        parentBoardId,
         place: place.default("top"),
       },
     },
@@ -84,16 +101,21 @@ export function registerCardTools(server: McpServer, board: Board): void {
       priority,
       tags,
       users,
+      parentId,
+      parentBoardId,
       place,
     }) => {
+      const { defaultTags } = await board.dashboard(boardId)
       const { cards } = await board.board(boardId)
       await board.column(boardId, columnId) // Reject an unknown column before writing.
       const assigned = users ? await board.assignable(boardId, users) : []
+      const id = newId("card")
+      if (parentId) await board.epic(id, parentId, parentBoardId ?? boardId)
 
       const now = board.now()
       const card: Card = touchCard(
         {
-          id: newId("card"),
+          id,
           title,
           body: body ?? "",
           position: positionAt(
@@ -104,9 +126,10 @@ export function registerCardTools(server: McpServer, board: Board): void {
           number: null,
           deadline: deadline ?? null,
           priority: priority ?? "",
-          tags: tags ?? [],
+          tags: applyDefaultTags(tags ?? [], defaultTags ?? []),
           users: assigned,
           attachments: [],
+          parentId: parentId ?? null,
           updatedAt: now,
           deletedAt: null,
           stamps: {},
@@ -127,7 +150,8 @@ export function registerCardTools(server: McpServer, board: Board): void {
     {
       title: "Update card",
       description:
-        "Edit a card's title, body, deadline, priority, tags, or assignees. " +
+        "Edit a card's title, body, deadline, priority, tags, assignees, " +
+        "or epic. " +
         "Omitted fields " +
         "are left alone; pass a null deadline or priority to clear it. " +
         "`append` adds to the end " +
@@ -148,6 +172,8 @@ export function registerCardTools(server: McpServer, board: Board): void {
         priority: priority.optional(),
         tags: tags.optional(),
         users: users.optional(),
+        parentId: parentId.optional(),
+        parentBoardId,
       },
     },
     async ({
@@ -160,9 +186,13 @@ export function registerCardTools(server: McpServer, board: Board): void {
       priority,
       tags,
       users,
+      parentId,
+      parentBoardId,
     }) => {
       const existing = await board.card(boardId, cardId)
       const assigned = users && (await board.assignable(boardId, users))
+      if (parentId && parentId !== existing.parentId)
+        await board.epic(cardId, parentId, parentBoardId ?? boardId)
 
       let nextBody = body ?? existing.body
       if (body === undefined && append)
@@ -178,6 +208,7 @@ export function registerCardTools(server: McpServer, board: Board): void {
         priority: priority === undefined ? existing.priority : (priority ?? ""),
         tags: tags ?? existing.tags,
         users: assigned ?? existing.users,
+        parentId: parentId === undefined ? existing.parentId : parentId,
       }
       const groups: CardGroup[] = []
       if (next.title !== existing.title) groups.push("title")
@@ -186,6 +217,7 @@ export function registerCardTools(server: McpServer, board: Board): void {
       if (next.priority !== existing.priority) groups.push("priority")
       if (tags !== undefined) groups.push("tags")
       if (assigned !== undefined) groups.push("users")
+      if (next.parentId !== existing.parentId) groups.push("parent")
       if (groups.length === 0) return reply(shapeCard(existing))
 
       const card = touchCard(next, groups, board.now())

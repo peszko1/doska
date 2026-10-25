@@ -9,6 +9,9 @@ export const routes = {
   /** Every board's cards in three shared lanes. Nested like the digest, for
    * the card panel. Takes `?tag=` to open filtered by those tags. */
   global: () => "/all",
+  /** Every board's backlog column, grouped by board. Nested like the digest,
+   * for the card panel. Takes `?tag=` like the global board. */
+  backlog: () => "/backlog",
   /** Deleted boards, columns and cards, restorable until they age out. */
   trash: () => "/trash",
   /** The account's habits, ticked day by day. */

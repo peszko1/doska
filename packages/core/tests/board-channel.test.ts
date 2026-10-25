@@ -56,6 +56,7 @@ const board: Dashboard = {
   title: "Board",
   position: "a0",
   sort: [],
+  defaultTags: [],
   updatedAt: 1,
   deletedAt: null,
 }
@@ -68,6 +69,7 @@ const column: Column = {
   collapsed: false,
   color: "",
   done: false,
+  backlog: false,
   updatedAt: 1,
   deletedAt: null,
   stamps: {},
@@ -86,6 +88,7 @@ const cardAt = (at: number, fields: Partial<Card> = {}): Card => ({
   tags: [],
   users: [],
   attachments: [],
+  parentId: null,
   updatedAt: at,
   deletedAt: null,
   stamps: {
@@ -97,6 +100,7 @@ const cardAt = (at: number, fields: Partial<Card> = {}): Card => ({
     tags: at,
     users: at,
     attachments: at,
+    parent: at,
     deleted: at,
     conflict: at,
   },
@@ -245,6 +249,7 @@ describe("applyBoardRemote", () => {
         collapsed: 1,
         color: 15,
         done: 1,
+        backlog: 1,
         deleted: 1,
       },
     }

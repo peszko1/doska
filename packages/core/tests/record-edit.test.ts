@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest"
-import { COLUMNS, HISTORY } from "../src/api/constants"
+import { CARDS, COLUMNS, HISTORY } from "../src/api/constants"
 import { recordEdit } from "../src/api/history/record-edit"
 import type { Card, HistoryEntry } from "../src/types"
 import { installMemoryRuntime, rows } from "./memory-runtime"
@@ -134,5 +134,23 @@ describe("recordEdit", () => {
     await recordEdit(before, { title: "Title" }, before)
     await recordEdit(before, { bodyConflict: null }, before)
     expect(historyRows()).toEqual([])
+  })
+
+  it("names the epic a card joins and leaves", async () => {
+    rows.set(`${CARDS}/epic1`, { id: "epic1", title: "Auth" })
+    const card = { ...before, parentId: null } as Card
+    await recordEdit(
+      { ...card, parentId: "epic1" },
+      { parentId: "epic1" },
+      card
+    )
+
+    const [entry] = historyRows()
+    expect(entry.data).toMatchObject({
+      field: "parentId",
+      from: "",
+      to: "epic1",
+      epic: "Auth",
+    })
   })
 })

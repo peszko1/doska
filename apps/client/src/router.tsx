@@ -1,4 +1,5 @@
 import { Route, Switch } from "wouter"
+import { BacklogPage } from "@/components/app/backlog-page"
 import { BoardPage } from "@/components/app/board-page"
 import { DigestPage } from "@/components/app/digest-page"
 import { GlobalBoardPage } from "@/components/app/global-board-page"
@@ -22,6 +23,9 @@ export function Router() {
       </Route>
       <Route path={routes.global()} nest>
         <GlobalBoardPage />
+      </Route>
+      <Route path={routes.backlog()} nest>
+        <BacklogPage />
       </Route>
       <Route path={routes.trash()}>
         <TrashPage />

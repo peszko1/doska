@@ -1,13 +1,16 @@
 import { TagChip } from "@doska/ui-kit"
-import { AtSign, Hash, X } from "lucide-react"
+import { AtSign, Diamond, Hash, X } from "lucide-react"
 
 interface IProps {
   label: string
-  prefix: "#" | "@"
+  /** `◆` for an epic, shown with its title. */
+  prefix: "#" | "@" | "◆"
   onClear: () => void
   /** Palette id; see `TagChip`. */
   color?: string
 }
+
+const ICONS = { "#": Hash, "@": AtSign, "◆": Diamond }
 
 /** One active filter, cleared by clicking it. */
 export function FilterPill({ label, prefix, onClear, color }: IProps) {
@@ -21,7 +24,7 @@ export function FilterPill({ label, prefix, onClear, color }: IProps) {
     >
       <TagChip
         label={label}
-        icon={prefix === "@" ? AtSign : Hash}
+        icon={ICONS[prefix]}
         color={color}
         className="transition-colors group-hover:border-primary/50"
       >

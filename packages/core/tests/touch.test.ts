@@ -14,6 +14,7 @@ const card: Card = {
   tags: [],
   users: [],
   attachments: [],
+  parentId: null,
   updatedAt: 10,
   deletedAt: null,
   stamps: {},
@@ -28,6 +29,7 @@ const column: Column = {
   collapsed: false,
   color: "",
   done: false,
+  backlog: false,
   updatedAt: 10,
   deletedAt: null,
   stamps: { title: 8 },
@@ -56,6 +58,7 @@ describe("touchCard", () => {
       tags: 10,
       users: 10,
       attachments: 10,
+      parent: 10,
       deleted: 10,
       conflict: 10,
     })

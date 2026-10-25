@@ -23,6 +23,7 @@ export const CARD_GROUPS = [
   "tags",
   "users",
   "attachments",
+  "parent",
   "deleted",
   "conflict",
 ] as const
@@ -33,6 +34,7 @@ export const COLUMN_GROUPS = [
   "collapsed",
   "color",
   "done",
+  "backlog",
   "deleted",
 ] as const
 
@@ -80,6 +82,12 @@ export const CardSchema = z.object({
   users: z.array(z.string()).default([]),
   /** Attached files; travels with the card's last-writer-wins record. */
   attachments: z.array(AttachmentSchema).default([]),
+  /**
+   * The epic this card belongs to: another card's id, on any board. One level
+   * only — a card with a parent is never a parent. `null` for none, and a
+   * parent that is gone or out of reach reads as none.
+   */
+  parentId: z.string().nullable().default(null),
   updatedAt: z.number(),
   deletedAt: z.number().nullable(),
   stamps: z.partialRecord(z.enum(CARD_GROUPS), z.number()).default({}),
@@ -107,6 +115,7 @@ export const CARD_FIELD_GROUP: Record<
   tags: "tags",
   users: "users",
   attachments: "attachments",
+  parentId: "parent",
   deletedAt: "deleted",
   bodyConflict: "conflict",
 }
@@ -125,6 +134,9 @@ export const ColumnSchema = z.object({
   color: z.string().default(""),
   /** Cards in this column are finished. */
   done: z.boolean().default(false),
+  /** The board's backlog: cards parked for later, left off the global board.
+   * At most one column per board carries it. */
+  backlog: z.boolean().default(false),
   updatedAt: z.number(),
   deletedAt: z.number().nullable(),
   stamps: z.partialRecord(z.enum(COLUMN_GROUPS), z.number()).default({}),
@@ -142,6 +154,7 @@ export const COLUMN_FIELD_GROUP: Record<
   collapsed: "collapsed",
   color: "color",
   done: "done",
+  backlog: "backlog",
   deletedAt: "deleted",
 }
 
@@ -150,6 +163,8 @@ export const DashboardSchema = z.object({
   title: z.string(),
   position: z.string(),
   sort: z.array(z.string()).default([]),
+  /** Tags every card created on, or moved onto, this board starts with. */
+  defaultTags: z.array(z.string()).default([]),
   updatedAt: z.number(),
   deletedAt: z.number().nullable(),
 })

@@ -36,3 +36,15 @@ export {
   SORT_MODES,
   type SortKey,
 } from "./sort-cards"
+export {
+  buildEpicIndex,
+  epicCandidates,
+  epicChildren,
+  epicOf,
+  epicProgress,
+  parentProblem,
+  subCardColumn,
+  type EpicCard,
+  type EpicIndex,
+  type EpicProgress,
+} from "./epics"
