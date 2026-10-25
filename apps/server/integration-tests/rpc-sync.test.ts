@@ -25,6 +25,7 @@ function card(id: string, columnId: string, updatedAt = now) {
     number: null,
     deadline: null,
     attachments: [],
+    parentId: null,
     updatedAt,
     deletedAt: null,
   }
@@ -149,5 +150,59 @@ describe("guard", () => {
       payload: JSON.stringify({ boardId: "b1", since: 0, changes: [] }),
     })
     expect(res.statusCode).toBe(401)
+  })
+})
+
+describe("epic, backlog and default-tag fields", () => {
+  test("round-trip through both channels", async () => {
+    const list = await client.dashboards.sync({
+      since: 0,
+      changes: [
+        {
+          store: "dashboards",
+          record: {
+            id: "b1",
+            title: "Music",
+            position: "a",
+            sort: [],
+            defaultTags: ["music"],
+            updatedAt: now,
+            deletedAt: null,
+          },
+        },
+      ],
+    })
+    expect(list.changes[0].record).toMatchObject({ defaultTags: ["music"] })
+
+    const res = await client.board.sync({
+      boardId: "b1",
+      since: 0,
+      changes: [
+        {
+          store: "columns",
+          record: {
+            id: "c1",
+            title: "Someday",
+            position: "a",
+            dashboardId: "b1",
+            collapsed: false,
+            backlog: true,
+            updatedAt: now,
+            deletedAt: null,
+          },
+        },
+        { store: "cards", record: card("epic", "c1") },
+        {
+          store: "cards",
+          record: { ...card("child", "c1"), parentId: "epic" },
+        },
+      ],
+    })
+    const pulled = Object.fromEntries(
+      res.changes.map((c) => [c.record.id, c.record])
+    )
+    expect(pulled.c1).toMatchObject({ backlog: true })
+    expect(pulled.epic).toMatchObject({ parentId: null })
+    expect(pulled.child).toMatchObject({ parentId: "epic" })
   })
 })

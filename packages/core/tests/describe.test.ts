@@ -118,4 +118,22 @@ describe("describeEntry", () => {
       text("created card"),
     ])
   })
+
+  it("describes joining and leaving an epic", () => {
+    const epic = { kind: "title", text: "Auth", cardId: "epic1" }
+    const joined = { field: "parentId", from: "", to: "epic1", epic: "Auth" }
+    const left = { field: "parentId", from: "epic1", to: "", epic: "Auth" }
+    expect(describeEntry(entry("edit", joined))).toEqual([
+      text("added"),
+      title,
+      text("to epic"),
+      epic,
+    ])
+    expect(describeEntry(entry("edit", left))).toEqual([
+      text("removed"),
+      title,
+      text("from epic"),
+      epic,
+    ])
+  })
 })

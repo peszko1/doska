@@ -9,6 +9,9 @@ export interface DeckContextValue {
   toggleTagFilter?: (tag: string) => void
   userFilters?: string[]
   toggleUserFilter?: (userId: string) => void
+  /** All tasks only: the epic whose cards it is narrowed to. */
+  epicFilter?: string | null
+  clearEpicFilter?: () => void
 }
 
 /**

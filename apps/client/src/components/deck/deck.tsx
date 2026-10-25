@@ -36,6 +36,7 @@ interface IProps {
   onReorderColumns: (changed: Board["columns"]) => void
   onChangeColumnColor: (columnId: string, color: string) => void
   onChangeColumnDone: (columnId: string, done: boolean) => void
+  onChangeColumnBacklog: (columnId: string, backlog: boolean) => void
   onRenameColumn: (columnId: string, title: string) => void
   onDeleteColumn: (columnId: string) => void
   onRenameDashboard: (name: string) => void
@@ -59,6 +60,7 @@ export function Deck({
   onReorderColumns,
   onChangeColumnColor,
   onChangeColumnDone,
+  onChangeColumnBacklog,
   onRenameColumn,
   onDeleteColumn,
   onRenameDashboard,
@@ -153,6 +155,10 @@ export function Deck({
                     }
                     done={column.done}
                     onChangeDone={(done) => onChangeColumnDone(column.id, done)}
+                    backlog={column.backlog}
+                    onChangeBacklog={(backlog) =>
+                      onChangeColumnBacklog(column.id, backlog)
+                    }
                     onDelete={() => onDeleteColumn(column.id)}
                   >
                     {ordered.map((card, index) => (

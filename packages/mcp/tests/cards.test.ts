@@ -1,5 +1,5 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
-import type { Card, Change, Column, Member } from "@doska/contract"
+import type { Card, Change, Column, Dashboard, Member } from "@doska/contract"
 import { describe, expect, it } from "vitest"
 import { createBoard } from "../src/board"
 import type { BoardStore } from "../src/store"
@@ -17,6 +17,7 @@ const column: Column = {
   collapsed: false,
   color: "",
   done: false,
+  backlog: false,
   updatedAt: synced,
   deletedAt: null,
   stamps: {},
@@ -34,10 +35,21 @@ const card: Card = {
   tags: [],
   users: [],
   attachments: [],
+  parentId: null,
   updatedAt: synced,
   deletedAt: null,
   stamps: {},
   bodyConflict: null,
+}
+
+const dashboard: Dashboard = {
+  id: "board-1",
+  title: "Board",
+  position: "a0",
+  sort: [],
+  defaultTags: ["work", "Music"],
+  updatedAt: synced,
+  deletedAt: null,
 }
 
 const member: Member = {
@@ -50,7 +62,7 @@ const member: Member = {
 class MemoryStore implements BoardStore {
   pushed: Change[] = []
   now = () => now
-  readDashboards = () => Promise.resolve([])
+  readDashboards = () => Promise.resolve([dashboard])
   readBoard = () =>
     Promise.resolve<Change[]>([
       { store: "columns", record: column },
@@ -136,6 +148,55 @@ describe("update_card", () => {
   })
 })
 
+describe("epics", () => {
+  const lastCard = (store: MemoryStore) => {
+    const change = store.pushed.at(-1)
+    if (change?.store !== "cards") throw new Error("no card pushed")
+    return change.record
+  }
+
+  it("puts a card under an epic and stamps only parent", async () => {
+    const { call, store } = cardTools()
+    await call("create_card", {
+      columnId: "col-1",
+      title: "Epic",
+      place: "top",
+    })
+    const epicId = lastCard(store).id
+    await call("update_card", { parentId: epicId })
+
+    const record = lastCard(store)
+    expect(record.id).toBe("card-1")
+    expect(record.parentId).toBe(epicId)
+    expect(record.stamps.parent).toBe(now)
+    expect(record.stamps.title).toBe(synced)
+  })
+
+  it("refuses an epic that is itself in one, or the card itself", async () => {
+    const { call, store } = cardTools()
+    await call("create_card", {
+      columnId: "col-1",
+      title: "Child",
+      parentId: "card-1",
+      place: "top",
+    })
+    const childId = lastCard(store).id
+    const pushed = store.pushed.length
+    await expect(
+      call("create_card", {
+        columnId: "col-1",
+        title: "Grandchild",
+        parentId: childId,
+        place: "top",
+      })
+    ).rejects.toThrow("already in an epic")
+    await expect(call("update_card", { parentId: "card-1" })).rejects.toThrow(
+      "own epic"
+    )
+    expect(store.pushed.length).toBe(pushed)
+  })
+})
+
 describe("create_card", () => {
   it("creates a card already assigned", async () => {
     const { call, pushedCard } = cardTools()
@@ -147,6 +208,18 @@ describe("create_card", () => {
     })
 
     expect(pushedCard().record.users).toEqual(["user-1"])
+  })
+
+  it("adds the board's default tags, keeping the card's own spelling", async () => {
+    const { call, pushedCard } = cardTools()
+    await call("create_card", {
+      columnId: "col-1",
+      title: "New",
+      tags: ["music"],
+      place: "top",
+    })
+
+    expect(pushedCard().record.tags).toEqual(["music", "work"])
   })
 })
 

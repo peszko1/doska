@@ -6,9 +6,18 @@ import {
   type ReactNode,
 } from "react"
 import { useLocation } from "wouter"
-import type { CardPatch, Card as CardData, Column } from "@doska/core"
+import {
+  useEpic,
+  useEpicChildren,
+  type CardPatch,
+  type Card as CardData,
+  type Column,
+} from "@doska/core"
+import { useOpenCard } from "@/lib/hooks"
 import { routes } from "@/lib/routes"
 import { useIsRevealed } from "@/providers/card-reveal/card-reveal-context"
+import { EpicHint } from "../epics/epic-hint"
+import { EpicProgress } from "../epics/epic-progress"
 import { HistoryModal } from "../history/history-modal"
 import { CardAttachments } from "./attachments/card-attachments"
 import { CardAttachmentImage } from "./attachments/card-attachment-image"
@@ -45,6 +54,9 @@ export const Card = memo(function Card({
   const id = card.id
   const isRevealed = useIsRevealed(id)
   const [historyOpen, setHistoryOpen] = useState(false)
+  const epic = useEpic(id)
+  const { progress } = useEpicChildren(id)
+  const openCard = useOpenCard()
 
   const open = () => navigate(routes.card.to(id))
   const showHistory = () => setHistoryOpen(true)
@@ -69,6 +81,15 @@ export const Card = memo(function Card({
         isRevealed={isRevealed}
         lead={lead}
         metaLead={metaLead}
+        metaTrail={progress.total > 0 && <EpicProgress {...progress} />}
+        hint={
+          epic && (
+            <EpicHint
+              epic={epic.card}
+              onOpen={() => openCard(epic.card.id, epic.board.id)}
+            />
+          )
+        }
         imageCard={imageCard}
         action={
           <CardMenu cardId={id} onEdit={open} onShowHistory={showHistory} />

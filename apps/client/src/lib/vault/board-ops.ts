@@ -9,6 +9,7 @@ import {
   moveCardToColumn,
   renameColumn,
   restore,
+  setCardParent,
   updateCard,
 } from "@doska/core"
 import type { Member } from "@doska/contract"
@@ -53,7 +54,12 @@ export function boardOps(boardId: string): VaultBoard {
     },
     createCard,
     createColumn: (title) => createColumn(boardId, title),
-    updateCard: async (id, patch) => {
+    updateCard: async (id, { parentId, ...patch }) => {
+      // Checked like a link made in the app; one the one-level rule refuses
+      // leaves the card where it was rather than failing the whole sync.
+      if (parentId !== undefined)
+        await setCardParent(id, parentId).catch(() => {})
+      if (Object.keys(patch).length === 0) return
       const names = patch.users
       if (!names) return updateCard(id, patch)
       const members = await membersOf(boardId)

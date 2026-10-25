@@ -6,6 +6,7 @@ import { CardPanelMenu } from "./card-panel-menu"
 import { CardBodyEditor } from "./card-body-editor"
 import { CardHelpButton } from "./card-help-button"
 import { CardMetaLive } from "../card/card-meta-live"
+import { SubCardsSection } from "../epics/sub-cards-section"
 import { CardAttachments } from "../card/attachments/card-attachments"
 import { AddAttachmentButton } from "../card/attachments/add-attachment-button"
 import { AttachmentDropZone } from "../card/attachments/attachment-drop-zone"
@@ -114,6 +115,7 @@ export function CardEditor({
               }
               notice={notice}
               tags={tags}
+              footer={withHeader && <SubCardsSection cardId={cardId} />}
               onClickBody={
                 isPreview
                   ? (e) => {

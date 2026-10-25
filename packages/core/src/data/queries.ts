@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { useMemo } from "react"
+import { useCallback, useMemo } from "react"
 import { countOwnedBoards, listAccounts } from "../api/accounts"
 import { publicBoardToken, publishedBoards } from "../api/boards"
 import { fetchSession } from "../api/auth"
@@ -20,6 +20,13 @@ import * as api from "../api/operations"
 import type { DigestFilter } from "../api/operations"
 import { GLOBAL_ORDER, HABIT_CHECKS, type UserStore } from "../api/constants"
 import { globalLanes } from "../utils/global-board"
+import {
+  epicCandidates,
+  epicChildren,
+  epicOf,
+  epicProgress,
+  type EpicIndex,
+} from "../utils/epics"
 import type { HistoryEntry } from "../types"
 import { keys } from "./keys"
 
@@ -263,7 +270,64 @@ export function useGlobalBoard() {
   }, [data, records, board.isPending])
 }
 
+/** Every board's backlog cards — see {@link api.getBacklog}. */
+export function useBacklog() {
+  return useQuery({
+    queryKey: keys.backlog,
+    queryFn: api.getBacklog,
+    networkMode: "always",
+  })
+}
+
 /** Deadlined cards across every board, for the digest. */
+function useEpicIndex<T>(select: (index: EpicIndex) => T, enabled = true) {
+  return useQuery({
+    queryKey: keys.epics,
+    queryFn: api.getEpicIndex,
+    select,
+    enabled,
+    networkMode: "always",
+  })
+}
+
+/** The card's epic: live, on a live column and board, and present here. */
+export function useEpic(cardId: string | null) {
+  const { data } = useEpicIndex(
+    useCallback(
+      (index: EpicIndex) => (cardId ? epicOf(index, cardId) : null),
+      [cardId]
+    ),
+    cardId != null
+  )
+  return data ?? null
+}
+
+/** The epic's live sub-cards with where they sit, and how many are done. */
+export function useEpicChildren(cardId: string | null) {
+  const { data } = useEpicIndex(
+    useCallback(
+      (index: EpicIndex) => {
+        const children = cardId ? epicChildren(index, cardId) : []
+        return { children, progress: epicProgress(children) }
+      },
+      [cardId]
+    ),
+    cardId != null
+  )
+  return data ?? EMPTY_EPIC
+}
+
+const EMPTY_EPIC = { children: [], progress: { done: 0, total: 0 } }
+
+/** The cards `cardId` could join, for the epic picker; only read while open. */
+export function useEpicCandidates(cardId: string, enabled: boolean) {
+  const { data } = useEpicIndex(
+    useCallback((index: EpicIndex) => epicCandidates(index, cardId), [cardId]),
+    enabled
+  )
+  return data ?? []
+}
+
 export function useDigest(filter: DigestFilter) {
   return useQuery({
     queryKey: keys.digestFilter(filter),

@@ -29,6 +29,29 @@ export function useSetDashboardSort() {
   })
 }
 
+/** Sets a board's default tags, the ones its new and moved-in cards get. */
+export function useSetBoardDefaultTags() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, tags }: { id: string; tags: string[] }) =>
+      api.setBoardDefaultTags(id, tags),
+    onSettled: () => qc.invalidateQueries({ queryKey: keys.dashboards }),
+  })
+}
+
+/** Tags every card already on the board that lacks the tag. */
+export function useAddTagToBoardCards(boardId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (tag: string) => api.addTagToBoardCards(boardId, tag),
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: keys.boards })
+      qc.invalidateQueries({ queryKey: keys.cards })
+      qc.invalidateQueries({ queryKey: keys.digest })
+    },
+  })
+}
+
 export function useDeleteDashboard() {
   const qc = useQueryClient()
   return useMutation({

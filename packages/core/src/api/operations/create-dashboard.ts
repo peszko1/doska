@@ -22,6 +22,7 @@ export async function createDashboard(name: string): Promise<Dashboard> {
     title: name,
     position,
     sort: [],
+    defaultTags: [],
     updatedAt: stamp(),
     deletedAt: null,
   }

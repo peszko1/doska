@@ -18,6 +18,7 @@ import {
 import { useRef, useState } from "react"
 import { CopyIdItem } from "../card/menu/copy-id-item"
 import { DeadlineSub } from "../card/menu/deadline-sub"
+import { EpicItems } from "../card/menu/epic-items"
 import { MoveToColumnSub } from "../card/menu/move-to-column-sub"
 import { PrioritySub } from "../card/menu/priority-sub"
 import { TagsSub } from "../card/menu/tags-sub"
@@ -84,6 +85,7 @@ export function CardPanelMenu({
           )}
           <MenuSeparator />
           <MoveToColumnSub cardId={cardId} />
+          <EpicItems cardId={cardId} />
           <MenuSeparator />
           <PrioritySub cardId={cardId} />
           <TagsSub cardId={cardId} />

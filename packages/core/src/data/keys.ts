@@ -30,6 +30,11 @@ export const keys = {
   /** Under the digest prefix: it spans every board the same way, so whatever
    * refreshes the digest refreshes it too. */
   globalBoard: ["digest", "global"] as const,
+  /** Also under the digest prefix, for the same reason. */
+  backlog: ["digest", "backlog"] as const,
+  /** Every card's epic links. Under the digest prefix for the same reason: a
+   * card write, a move or a pulled board anywhere can change them. */
+  epics: ["digest", "epics"] as const,
   cardDeck: (id: string) => ["card-deck", id] as const,
   /** The bare key is the invalidation prefix for every card's column. */
   cardCols: ["card-col"] as const,

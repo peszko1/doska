@@ -43,6 +43,10 @@ interface IProps extends DetailedHTMLProps<
   lead?: ReactNode
   /** Opens the meta row, for the card's column or board. */
   metaLead?: ReactNode
+  /** Closes the meta row, for an epic's progress. */
+  metaTrail?: ReactNode
+  /** One line under the title, naming the epic a sub-card belongs to. */
+  hint?: ReactNode
   /** Off where a card whose whole body is one image should still read as an
    * ordinary card, as in the digest. */
   imageCard?: boolean
@@ -75,6 +79,8 @@ export function CardView({
   action,
   lead,
   metaLead,
+  metaTrail,
+  hint,
   imageCard = true,
   onChangeBody,
   onChangeDeadline,
@@ -105,6 +111,7 @@ export function CardView({
   const users = card.users ?? []
   const hasMeta =
     !!metaLead ||
+    !!metaTrail ||
     tasks.total > 0 ||
     !!card.deadline ||
     !!card.priority ||
@@ -143,6 +150,7 @@ export function CardView({
                 </CardAction>
               )}
             </CardHeader>
+            {hint && <div className="-mt-2 px-3">{hint}</div>}
             {hasMeta && (
               <CardContent>
                 <CardMeta
@@ -150,6 +158,7 @@ export function CardView({
                   column={column}
                   tasks={tasks}
                   lead={metaLead}
+                  trail={metaTrail}
                   onChangeDeadline={onChangeDeadline}
                   onChangePriority={onChangePriority}
                   className="mt-2"

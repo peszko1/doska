@@ -1,4 +1,4 @@
-import { useActiveUsers, useTagColor } from "@doska/core"
+import { useActiveUsers, useCard, useTagColor } from "@doska/core"
 import { useDeck } from "@/providers/deck/deck-context"
 import { useAuth } from "@/lib/hooks"
 import { FilterPill } from "./filter-pill"
@@ -10,16 +10,26 @@ export function TagFilterPills() {
     toggleTagFilter,
     userFilters = [],
     toggleUserFilter,
+    epicFilter,
+    clearEpicFilter,
   } = useDeck()
   const { authed } = useAuth()
   const { data: activeUsers = [] } = useActiveUsers(!!authed)
   const tagColor = useTagColor()
+  const { data: epic } = useCard(epicFilter ?? null)
 
   const users = activeUsers.filter((user) => userFilters.includes(user.id))
-  if (tagFilters.length === 0 && users.length === 0) return null
+  if (tagFilters.length === 0 && users.length === 0 && !epicFilter) return null
 
   return (
     <div className="flex shrink-0 flex-wrap items-center gap-2 border-b px-4 py-1.5">
+      {epicFilter && clearEpicFilter && (
+        <FilterPill
+          label={epic?.title || "Untitled card"}
+          prefix="◆"
+          onClear={clearEpicFilter}
+        />
+      )}
       {toggleUserFilter &&
         users.map((user) => (
           <FilterPill

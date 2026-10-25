@@ -2,7 +2,13 @@ import type { DroppableProvidedProps } from "@hello-pangea/dnd"
 import { createElement, type ReactNode, type Ref } from "react"
 import { toast } from "react-hot-toast"
 import { Button, cn } from "@doska/ui-kit"
-import { Check, FoldVertical, Plus, UnfoldVertical } from "lucide-react"
+import {
+  Archive,
+  Check,
+  FoldVertical,
+  Plus,
+  UnfoldVertical,
+} from "lucide-react"
 import { ColumnSwatch } from "./column-swatch"
 import { ColumnTitle } from "./column-title"
 import { AddCardBlockedToast } from "@/components/toasts/add-card-blocked/add-card-blocked-toast"
@@ -11,6 +17,7 @@ interface IProps {
   title: string
   color: string
   done: boolean
+  backlog?: boolean
   showBody: boolean
   onToggleBody: () => void
   /** Omit to make the title fixed text. */
@@ -34,6 +41,7 @@ export function ColumnView({
   title,
   color,
   done,
+  backlog = false,
   showBody,
   onToggleBody,
   onRename,
@@ -63,16 +71,27 @@ export function ColumnView({
           <ColumnSwatch color={color} labelled className="ml-1" />
           <div>
             <ColumnTitle title={title} onRename={onRename} />
-            {/* The only place the flag shows — its toggle lives in the menu. */}
+            {/* The only place the flags show — their toggles live in the menu. */}
             {!!done && (
               <div className="absolute -mt-1 ml-2 text-xs text-muted-foreground/50">
                 Marks cards as done
+              </div>
+            )}
+            {backlog && (
+              <div className="absolute -mt-1 ml-2 text-xs text-muted-foreground/50">
+                Kept off All tasks
               </div>
             )}
           </div>
           {done && (
             <Check
               aria-label={`${title} is the done column`}
+              className="-ml-2 size-4 shrink-0"
+            />
+          )}
+          {backlog && (
+            <Archive
+              aria-label={`${title} is the backlog column`}
               className="-ml-2 size-4 shrink-0"
             />
           )}

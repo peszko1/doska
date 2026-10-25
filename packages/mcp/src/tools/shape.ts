@@ -21,6 +21,8 @@ export function shapeCard(card: Card) {
     tags: card.tags,
     // User ids; get_board maps them to members.
     users: card.users,
+    // The epic's card id, when this card is a sub-card.
+    parentId: card.parentId,
     tasks: total > 0 ? { done, total } : null,
     attachments: card.attachments.map(({ name, mime, size }) => ({
       name,

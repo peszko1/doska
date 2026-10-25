@@ -18,6 +18,7 @@ import { TrashButton } from "@/components/trash/trash-button"
 import { HistoryButton } from "@/components/history/history-button"
 import { UpcomingButton } from "@/components/digest/upcoming-button"
 import { GlobalBoardButton } from "@/components/global-board/global-board-button"
+import { BacklogButton } from "@/components/backlog/backlog-button"
 import { HabitsButton } from "@/components/habits/habits-button"
 import { isDesktop } from "@/lib/platform"
 
@@ -35,6 +36,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarMenu>
             <GlobalBoardButton />
+            <BacklogButton />
             <UpcomingButton />
             <HabitsButton />
             <TrashButton />

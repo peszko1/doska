@@ -13,16 +13,19 @@ interface IProps {
   title: string
   description?: string
   confirmLabel?: string
+  /** Styles the confirm button as a destructive action. */
+  destructive?: boolean
   onConfirm: () => void
 }
 
-/** A small "are you sure?" modal for destructive actions. */
+/** A small "are you sure?" modal, for destructive actions by default. */
 export function ConfirmDialog({
   open,
   onOpenChange,
   title,
   description,
   confirmLabel = "Delete",
+  destructive = true,
   onConfirm,
 }: IProps) {
   return (
@@ -40,7 +43,11 @@ export function ConfirmDialog({
                 onConfirm()
                 onOpenChange(false)
               }}
-              className="bg-destructive text-white hover:bg-destructive/90"
+              className={
+                destructive
+                  ? "bg-destructive text-white hover:bg-destructive/90"
+                  : undefined
+              }
             >
               {confirmLabel}
             </Button>

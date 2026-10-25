@@ -19,6 +19,7 @@ const card = (id: string, columnId: string, position: string) => ({
   body: "notes",
   number: 4,
   attachments: [attachment],
+  parentId: null,
   updatedAt: 1,
   deletedAt: null,
 })

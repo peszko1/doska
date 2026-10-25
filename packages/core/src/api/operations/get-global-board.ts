@@ -8,7 +8,8 @@ import { db } from "../db/db"
 import { live } from "./live"
 
 export interface GlobalBoard {
-  /** Every live card on a live board, with the lane its column feeds. */
+  /** Every live card on a live board, with the lane its column feeds.
+   * Backlog cards feed none, so they're left out. */
   entries: GlobalCard[]
   /** Every board's columns by lane, empty ones included, for drops. */
   stages: Map<string, BoardStages>
@@ -36,13 +37,14 @@ export async function getGlobalBoard(): Promise<GlobalBoard> {
 
   const entries = cards.filter(live).flatMap((card) => {
     const column = columnById.get(card.columnId)
-    if (!column) return []
+    const stage = column && stageOf.get(column.id)
+    if (!column || !stage) return []
     return [
       {
         card,
         column,
         board: boardById.get(column.dashboardId)!,
-        stage: stageOf.get(column.id)!,
+        stage,
       },
     ]
   })

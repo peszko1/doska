@@ -162,6 +162,13 @@
       "when": 1792930768899,
       "tag": "0022_user_records",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1792933335178,
+      "tag": "0023_epics_backlog_default_tags",
+      "breakpoints": true
     }
   ]
 }

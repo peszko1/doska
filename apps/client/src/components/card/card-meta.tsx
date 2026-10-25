@@ -21,6 +21,8 @@ interface IProps {
   className?: string
   showEmpty?: boolean
   lead?: ReactNode
+  /** Closes the row, after the card's own fields: an epic's progress. */
+  trail?: ReactNode
 }
 
 /** A card's task progress, deadline and priority — on the board card and in its panel. */
@@ -34,6 +36,7 @@ export function CardMeta({
   className,
   showEmpty,
   lead,
+  trail,
 }: IProps) {
   const { done, total } = tasks ?? taskProgress(body ?? card.body)
 
@@ -51,6 +54,7 @@ export function CardMeta({
       {(showEmpty || !!card.priority) && (
         <CardPriority value={card.priority} onChange={onChangePriority} />
       )}
+      {trail}
       {card.bodyConflict && <ConflictMarker />}
     </div>
   )

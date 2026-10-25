@@ -41,6 +41,7 @@ export { renameColumn } from "./rename-column"
 export { setColumnCollapsed } from "./set-column-collapsed"
 export { setColumnColor } from "./set-column-color"
 export { setColumnDone } from "./set-column-done"
+export { setColumnBacklog } from "./set-column-backlog"
 export { deleteColumn } from "./delete-column"
 export { moveColumn } from "./move-column"
 export { getCard } from "./get-card"
@@ -50,6 +51,8 @@ export { deleteCard } from "./delete-card"
 export { moveCard } from "./move-card"
 export { moveCardToColumn } from "./move-card-to-column"
 export { moveCardToBoard } from "./move-card-to-board"
+export { moveCardToBacklog } from "./move-card-to-backlog"
+export { sendCardToBoard } from "./send-card-to-board"
 export { restore } from "./restore"
 export type { TrashKind } from "./restore"
 export { getTrash, expiryLabel } from "./get-trash"
@@ -76,6 +79,8 @@ export {
 export type { TagSummary } from "./tags"
 export { getGlobalBoard } from "./get-global-board"
 export type { GlobalBoard } from "./get-global-board"
+export { getBacklog } from "./get-backlog"
+export type { BacklogGroup } from "./get-backlog"
 export {
   createHabit,
   deleteHabit,
@@ -84,3 +89,5 @@ export {
   setHabitCheck,
   updateHabit,
 } from "./habits"
+export { addTagToBoardCards, setBoardDefaultTags } from "./board-default-tags"
+export { createSubCard, getEpicIndex, setCardParent } from "./epics"

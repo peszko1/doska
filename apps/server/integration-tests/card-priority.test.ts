@@ -37,6 +37,7 @@ function card(id: string, priority: string) {
     deadline: null,
     priority,
     attachments: [],
+    parentId: null,
     updatedAt: now,
     deletedAt: null,
   }
@@ -75,6 +76,7 @@ describe("card priority sync", () => {
             number: null,
             deadline: null,
             attachments: [],
+            parentId: null,
             updatedAt: now,
             deletedAt: null,
           } as unknown as Card,

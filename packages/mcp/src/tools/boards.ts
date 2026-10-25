@@ -41,7 +41,8 @@ export function registerBoardTools(server: McpServer, board: Board): void {
         "Read a board in full: its columns left to right — with their " +
         "color, and which one is the done column — each holding its cards " +
         "top to bottom with Markdown bodies, deadlines and task-list " +
-        "progress, plus its members: the people a card can be assigned to. " +
+        "progress, plus its members: the people a card can be assigned to, " +
+        "and its default tags: the ones new cards get. " +
         "Pass bodies: false for an outline of a large board.",
       inputSchema: {
         boardId: z.string(),
@@ -52,12 +53,13 @@ export function registerBoardTools(server: McpServer, board: Board): void {
       },
     },
     async ({ boardId, bodies }) => {
-      const { title } = await board.dashboard(boardId)
+      const { title, defaultTags } = await board.dashboard(boardId)
       const { columns, cards } = await board.board(boardId)
       const members = await board.members(boardId)
       return reply({
         boardId,
         title,
+        defaultTags,
         members: members.map(({ userId, username, role }) => ({
           userId,
           username,
@@ -113,6 +115,7 @@ export function registerBoardTools(server: McpServer, board: Board): void {
         title,
         position: positionAt(existing, "bottom"),
         sort: [],
+        defaultTags: [],
         updatedAt: board.now(),
         deletedAt: null,
       }
@@ -131,6 +134,7 @@ export function registerBoardTools(server: McpServer, board: Board): void {
               dashboardId: dashboard.id,
               collapsed: false,
               done: false,
+              backlog: false,
               color: "",
               updatedAt: now,
               deletedAt: null,
@@ -160,6 +164,26 @@ export function registerBoardTools(server: McpServer, board: Board): void {
     async ({ boardId, title }) => {
       const dashboard = touch(
         { ...(await board.dashboard(boardId)), title },
+        board.now()
+      )
+      await board.pushDashboards([{ store: "dashboards", record: dashboard }])
+      return reply(dashboard)
+    }
+  )
+
+  server.registerTool(
+    "set_board_default_tags",
+    {
+      title: "Set board default tags",
+      description:
+        "Set the tags, without the #, that every card created on or moved " +
+        "onto the board gets. Replaces the list; [] clears it. Cards " +
+        "already on the board keep their tags.",
+      inputSchema: { boardId: z.string(), tags: z.array(z.string()) },
+    },
+    async ({ boardId, tags }) => {
+      const dashboard = touch(
+        { ...(await board.dashboard(boardId)), defaultTags: tags },
         board.now()
       )
       await board.pushDashboards([{ store: "dashboards", record: dashboard }])

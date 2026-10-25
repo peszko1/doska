@@ -68,6 +68,7 @@ export const dashboards = pgTable(
     title: text("title").notNull(),
     position: text("position").notNull(),
     sort: jsonb("sort").$type<string[]>().notNull().default([]),
+    defaultTags: jsonb("default_tags").$type<string[]>().notNull().default([]),
     ownerId: text("owner_id"),
     publicToken: text("public_token").unique(),
     publishedAt: bigint("published_at", { mode: "number" }),
@@ -88,6 +89,7 @@ export const columns = pgTable(
     collapsed: boolean("collapsed").notNull().default(false),
     color: text("color").notNull().default(""),
     done: boolean("done").notNull().default(false),
+    backlog: boolean("backlog").notNull().default(false),
     updatedAt: bigint("updated_at", { mode: "number" }).notNull(),
     deletedAt: bigint("deleted_at", { mode: "number" }),
     stamps: jsonb("stamps").$type<Column["stamps"]>().notNull().default({}),
@@ -114,6 +116,7 @@ export const cards = pgTable(
       .$type<Attachment[]>()
       .notNull()
       .default([]),
+    parentId: text("parent_id"),
     updatedAt: bigint("updated_at", { mode: "number" }).notNull(),
     deletedAt: bigint("deleted_at", { mode: "number" }),
     stamps: jsonb("stamps").$type<Card["stamps"]>().notNull().default({}),

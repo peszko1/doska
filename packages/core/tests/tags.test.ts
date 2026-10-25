@@ -20,6 +20,7 @@ const board = (id: string, deletedAt: number | null = null) =>
     title: id,
     position: "a0",
     sort: [],
+    defaultTags: [],
     updatedAt: 1,
     deletedAt,
   } satisfies Dashboard)
@@ -33,6 +34,7 @@ const column = (id: string, dashboardId: string) =>
     collapsed: false,
     color: "",
     done: false,
+    backlog: false,
     updatedAt: 1,
     deletedAt: null,
     stamps: {},
@@ -51,6 +53,7 @@ const card = (id: string, columnId: string, tags: string[]) =>
     tags,
     users: [],
     attachments: [],
+    parentId: null,
     updatedAt: 1,
     deletedAt: null,
     stamps: {},

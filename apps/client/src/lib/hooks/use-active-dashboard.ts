@@ -27,6 +27,7 @@ export function useActiveDashboard(deckId?: string) {
     title: "",
     position: generateKeyBetween(null, null),
     sort: [],
+    defaultTags: [],
     deletedAt: null,
     updatedAt: 0,
   }

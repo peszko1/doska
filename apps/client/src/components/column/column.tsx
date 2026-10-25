@@ -18,6 +18,9 @@ interface IProps {
   /** Cards in this column count as finished. */
   done: boolean
   onChangeDone: (done: boolean) => void
+  /** Cards in this column wait off the global board. */
+  backlog: boolean
+  onChangeBacklog: (backlog: boolean) => void
   onDelete: () => void
 }
 
@@ -34,6 +37,8 @@ export function Column({
   onChangeColor,
   done,
   onChangeDone,
+  backlog,
+  onChangeBacklog,
   onDelete,
 }: IProps) {
   const [confirmOpen, setConfirmOpen] = useState(false)
@@ -45,6 +50,7 @@ export function Column({
           title={title}
           color={color}
           done={done}
+          backlog={backlog}
           showBody={showBody}
           onToggleBody={onToggleBody}
           onRename={onRename}
@@ -61,6 +67,8 @@ export function Column({
                 onChangeColor={onChangeColor}
                 done={done}
                 onChangeDone={onChangeDone}
+                backlog={backlog}
+                onChangeBacklog={onChangeBacklog}
                 onDelete={() => setConfirmOpen(true)}
               />
               <ConfirmDialog
